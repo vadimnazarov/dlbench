@@ -5,13 +5,10 @@ from torch import optim
 
 import time
 import sys
+from argparse import ArgumentParser
 
 
-batch_size = 64
-n_batches = 100
-n_features = 5000
-
-def train(cuda_is_enabled=False):
+def train(batch_size, n_batches, n_features, cuda_is_enabled=False):
 	layers = []
 	layers.append(nn.Linear(n_features, 64))
 	layers.append(nn.Linear(64, 64))
@@ -40,6 +37,12 @@ def train(cuda_is_enabled=False):
 
 
 if __name__ == "__main__":
+	parser = ArgumentParser()
+	parser.add_argument("-b", default=64, help="batch size")
+	parser.add_argument("-n", default=100, help="number of batches")
+	parser.add_argument("-f", default=5000, help="number of features")
+	args = parser.parse_args()
+
 	print("Deep Learning Benchmark")
 	print()
 	print(" - CUDA?", torch.cuda.is_available())
@@ -47,9 +50,18 @@ if __name__ == "__main__":
 	print(" - #devices", torch.cuda.device_count())
 
 	print("CPU")
-	train()
+	train(args.b, args.n, args.f)
 
 	if torch.cuda.device_count():
+		print("CUDNN benchmark OFF")
+		cudnn.benchmark = False
 		for device in range(torch.cuda.device_count()):
 			print("GPU", device)
-			train(torch.cuda.is_available())
+			train(args.b, args.n, args.f, torch.cuda.is_available())
+
+		if torch.backends.cudnn.enabled:
+			print("CUDNN benchmark ON")
+			cudnn.benchmark = True
+			for device in range(torch.cuda.device_count()):
+				print("GPU", device)
+				train(args.b, args.n, args.f, torch.cuda.is_available())
