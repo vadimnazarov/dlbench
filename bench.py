@@ -17,7 +17,6 @@ def train(batch_size, n_batches, n_features, device="cpu"):
 	model = nn.Sequential(*layers)
 	model.to(device)
 
-
 	optimizer = optim.Adam(model.parameters())
 
 	start = time.time()
@@ -56,11 +55,11 @@ if __name__ == "__main__":
 		torch.backends.cudnn.benchmark = False
 		for device in range(torch.cuda.device_count()):
 			print("GPU", device)
-			train(args.b, args.n, args.f, torch.cuda.is_available(), device)
+			train(args.b, args.n, args.f, device)
 
 		if torch.backends.cudnn.enabled:
 			print("CUDNN benchmark ON")
 			torch.backends.cudnn.benchmark = True
 			for device in range(torch.cuda.device_count()):
 				print("GPU", device)
-				train(args.b, args.n, args.f, torch.cuda.is_available(), device)
+				train(args.b, args.n, args.f, device)
