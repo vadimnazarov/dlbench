@@ -42,7 +42,7 @@ def train(cuda_is_enabled):
 if __name__ == "__main__":
 	print("Deep Learning Benchmark")
 	print()
-	print(" - CUDA?", cuda_is_enabled)
+	print(" - CUDA?", torch.cuda.is_available())
 	print(" - CUDNN?", torch.backends.cudnn.enabled)
 	print(" - #devices", torch.cuda.device_count())
 
