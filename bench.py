@@ -17,6 +17,7 @@ def train(batch_size, n_batches, n_features, cuda_is_enabled=False):
 	model = nn.Sequential(*layers)
 	if cuda_is_enabled:
 		model.cuda()
+	print(model)
 
 	optimizer = optim.Adam(model.parameters())
 
