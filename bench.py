@@ -28,8 +28,8 @@ def train(cuda_is_enabled=False):
 		batch_x = torch.FloatTensor([_ for _ in range(n_features * batch_size)]).random_(-1, 1).reshape((batch_size, n_features))
 		batch_y = torch.normal(torch.FloatTensor([_ for _ in range(batch_size)]))
 		if cuda_is_enabled:
-			batch_x.cuda()
-			batch_y.cuda()
+			batch_x = batch_x.cuda()
+			batch_y = batch_y.cuda()
 		pred = model(batch_x)
 		loss = F.mse_loss(batch_y, pred)
 		loss.backward()
