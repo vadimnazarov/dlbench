@@ -54,14 +54,14 @@ if __name__ == "__main__":
 
 	if torch.cuda.device_count():
 		print("CUDNN benchmark OFF")
-		cudnn.benchmark = False
+		torch.backends.cudnn.benchmark = False
 		for device in range(torch.cuda.device_count()):
 			print("GPU", device)
 			train(args.b, args.n, args.f, torch.cuda.is_available())
 
 		if torch.backends.cudnn.enabled:
 			print("CUDNN benchmark ON")
-			cudnn.benchmark = True
+			torch.backends.cudnn.benchmark = True
 			for device in range(torch.cuda.device_count()):
 				print("GPU", device)
 				train(args.b, args.n, args.f, torch.cuda.is_available())
