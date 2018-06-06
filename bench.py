@@ -8,28 +8,24 @@ import sys
 from argparse import ArgumentParser
 
 
-def train(batch_size, n_batches, n_features, cuda_is_enabled=False):
+def train(batch_size, n_batches, n_features, device="cpu"):
 	layers = []
 	layers.append(nn.Linear(n_features, 64))
 	layers.append(nn.Linear(64, 64))
 	layers.append(nn.Linear(64, 64))
 	layers.append(nn.Linear(64, 1))
 	model = nn.Sequential(*layers)
-	if cuda_is_enabled:
-		model.cuda()
+	model.to(device)
+
 
 	optimizer = optim.Adam(model.parameters())
 
 	start = time.time()
 	for i in range(n_batches):
-		batch_x = torch.FloatTensor([_ for _ in range(n_features * batch_size)]).random_(-1, 1).reshape((batch_size, n_features))
-		batch_y = torch.normal(torch.FloatTensor([_ for _ in range(batch_size)]))
-		if cuda_is_enabled:
-			batch_x = batch_x.cuda()
-			batch_y = batch_y.cuda()
+		batch_x = torch.FloatTensor([_ for _ in range(n_features * batch_size)], device=device).random_(-1, 1).reshape((batch_size, n_features))
+		batch_y = torch.normal(torch.FloatTensor([_ for _ in range(batch_size)]), device=device)
 		if i == 0:
-			print(batch_x.device)
-			print(batch_y.device)
+			print(batch_x.device, batch_y.device)
 		pred = model(batch_x)
 		loss = F.mse_loss(batch_y, pred)
 		loss.backward()
@@ -60,11 +56,11 @@ if __name__ == "__main__":
 		torch.backends.cudnn.benchmark = False
 		for device in range(torch.cuda.device_count()):
 			print("GPU", device)
-			train(args.b, args.n, args.f, torch.cuda.is_available())
+			train(args.b, args.n, args.f, torch.cuda.is_available(), device)
 
 		if torch.backends.cudnn.enabled:
 			print("CUDNN benchmark ON")
 			torch.backends.cudnn.benchmark = True
 			for device in range(torch.cuda.device_count()):
 				print("GPU", device)
-				train(args.b, args.n, args.f, torch.cuda.is_available())
+				train(args.b, args.n, args.f, torch.cuda.is_available(), device)
