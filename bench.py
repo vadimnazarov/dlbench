@@ -8,8 +8,9 @@ import sys
 
 
 batch_size = 64
-n_batches = 1000
+n_batches = 100
 n_features = 5000
+cuda_is_enabled = torch.cuda.is_available()
 
 
 def train():
@@ -19,6 +20,8 @@ def train():
 	layers.append(nn.Linear(64, 64))
 	layers.append(nn.Linear(64, 1))
 	model = nn.Sequential(*layers)
+	if cuda_is_enabled:
+		model.cuda()
 
 	optimizer = optim.Adam(model.parameters())
 
@@ -26,6 +29,9 @@ def train():
 	for i in range(n_batches):
 		batch_x = torch.FloatTensor([_ for _ in range(n_features * batch_size)]).random_(-1, 1).reshape((batch_size, n_features))
 		batch_y = torch.normal(torch.FloatTensor([_ for _ in range(batch_size)]))
+		if cuda_is_enabled:
+			batch_x.cuda()
+			batch_y.cuda()
 		pred = model(batch_x)
 		loss = F.mse_loss(batch_y, pred)
 		loss.backward()
@@ -38,6 +44,7 @@ def train():
 if __name__ == "__main__":
 	print("Deep Learning Benchmark")
 	print()
+	print(" - CUDA?", cuda_is_enabled)
 	print(" - CUDNN?", torch.backends.cudnn.enabled)
 	print(" - #devices", torch.cuda.device_count())
 
@@ -45,8 +52,6 @@ if __name__ == "__main__":
 	train()
 
 	if torch.cuda.device_count():
-		print("Setting device 0")
-		torch.cuda.set_device(0)
-
-	print("GPU")
-	train()
+		for device in range(torch.cuda.device_count()):
+			print("GPU", device)
+			train()
