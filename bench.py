@@ -10,10 +10,8 @@ import sys
 batch_size = 64
 n_batches = 100
 n_features = 5000
-cuda_is_enabled = torch.cuda.is_available()
 
-
-def train():
+def train(cuda_is_enabled):
 	layers = []
 	layers.append(nn.Linear(n_features, 64))
 	layers.append(nn.Linear(64, 64))
@@ -54,4 +52,4 @@ if __name__ == "__main__":
 	if torch.cuda.device_count():
 		for device in range(torch.cuda.device_count()):
 			print("GPU", device)
-			train()
+			train(torch.cuda.is_available())
