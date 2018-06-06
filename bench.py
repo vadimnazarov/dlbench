@@ -23,7 +23,7 @@ def train(batch_size, n_batches, n_features, device="cpu"):
 	start = time.time()
 	for i in range(n_batches):
 		batch_x = torch.FloatTensor([_ for _ in range(n_features * batch_size)], device=device).random_(-1, 1).reshape((batch_size, n_features))
-		batch_y = torch.normal(torch.FloatTensor([_ for _ in range(batch_size)]), device=device)
+		batch_y = torch.normal(torch.FloatTensor([_ for _ in range(batch_size)])).to(device)
 		if i == 0:
 			print(batch_x.device, batch_y.device)
 		pred = model(batch_x)
