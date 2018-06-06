@@ -11,7 +11,7 @@ batch_size = 64
 n_batches = 100
 n_features = 5000
 
-def train(cuda_is_enabled):
+def train(cuda_is_enabled=False):
 	layers = []
 	layers.append(nn.Linear(n_features, 64))
 	layers.append(nn.Linear(64, 64))
