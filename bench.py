@@ -36,9 +36,9 @@ def train(batch_size, n_batches, n_features, device="cpu"):
 
 if __name__ == "__main__":
 	parser = ArgumentParser()
-	parser.add_argument("-b", default=64, help="batch size")
-	parser.add_argument("-n", default=100, help="number of batches")
-	parser.add_argument("-f", default=5000, help="number of features")
+	parser.add_argument("-b", default=64, help="batch size", type=int)
+	parser.add_argument("-n", default=100, help="number of batches", type=int)
+	parser.add_argument("-f", default=5000, help="number of features", type=int)
 	args = parser.parse_args()
 
 	print("Deep Learning Benchmark")
