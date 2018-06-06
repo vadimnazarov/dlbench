@@ -12,14 +12,7 @@ n_batches = 1000
 n_features = 5000
 
 
-if __name__ == "__main__":
-	print("Deep Learning Benchmark")
-	print()
-	print(" - CUDNN?", torch.backends.cudnn.enabled)
-	print(" - #devices", torch.cuda.device_count())
-	# torch.cuda.set_device(args.gpu)
-
-
+def train():
 	layers = []
 	layers.append(nn.Linear(n_features, 64))
 	layers.append(nn.Linear(64, 64))
@@ -28,7 +21,6 @@ if __name__ == "__main__":
 	model = nn.Sequential(*layers)
 
 	optimizer = optim.Adam(model.parameters())
-
 
 	start = time.time()
 	for i in range(n_batches):
@@ -41,3 +33,20 @@ if __name__ == "__main__":
 	end = time.time()
 
 	print((end - start) / (n_batches / 10), "s / 10*batch")
+
+
+if __name__ == "__main__":
+	print("Deep Learning Benchmark")
+	print()
+	print(" - CUDNN?", torch.backends.cudnn.enabled)
+	print(" - #devices", torch.cuda.device_count())
+
+	print("CPU")
+	train()
+
+	if torch.cuda.device_count():
+		print("Setting device 0")
+		torch.cuda.set_device(0)
+
+	print("GPU")
+	train()
