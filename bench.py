@@ -17,7 +17,6 @@ def train(batch_size, n_batches, n_features, cuda_is_enabled=False):
 	model = nn.Sequential(*layers)
 	if cuda_is_enabled:
 		model.cuda()
-	print(model)
 
 	optimizer = optim.Adam(model.parameters())
 
@@ -28,6 +27,9 @@ def train(batch_size, n_batches, n_features, cuda_is_enabled=False):
 		if cuda_is_enabled:
 			batch_x = batch_x.cuda()
 			batch_y = batch_y.cuda()
+		if i == 0:
+			print(batch_x.device)
+			print(batch_y.device)
 		pred = model(batch_x)
 		loss = F.mse_loss(batch_y, pred)
 		loss.backward()
