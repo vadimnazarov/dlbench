@@ -211,7 +211,7 @@ if __name__ == "__main__":
 
     with open("log.txt", "w") as outf:
         outf.write(json.dumps(stats, sort_keys=True, indent=4, separators=(',', ': ')))
-    print(json_normalize(stats))
+    print(json_normalize([stats]))
 
 """
 0.04
