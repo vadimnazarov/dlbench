@@ -41,8 +41,10 @@ def train_dnn(batch_size, n_batches, n_features, device="cpu"):
 
 def train_cnn_full(model_type, trn_loader, tst_loader, device="cuda:0"):
     assert device != "cpu"
+    print(device)
     if type(device) is int:
         device = "cuda:" + str(device)
+    print(device)
     model = make_model(model_type.lower()).to(device)
 
     optimizer = optim.Adam(model.parameters())
@@ -65,8 +67,10 @@ def train_cnn_full(model_type, trn_loader, tst_loader, device="cuda:0"):
 
 def train_cnn_gpu_only(model_type, trn_loader, tst_loader, device="cuda:0"):
     assert device != "cpu"
+    print(device)
     if type(device) is int:
         device = "cuda:" + str(device)
+    print(device)
     model = make_model(model_type.lower()).to(device)
 
     optimizer = optim.Adam(model.parameters())
@@ -94,8 +98,10 @@ def train_cnn_gpu_only(model_type, trn_loader, tst_loader, device="cuda:0"):
 
 def train_cnn_ram(model_type, trn_loader, tst_loader, device="cuda:0"):
     assert device != "cpu"
+    print(device)
     if type(device) is int:
         device = "cuda:" + str(device)
+    print(device)
     model = make_model(model_type.lower()).to(device)
 
     optimizer = optim.Adam(model.parameters())
@@ -161,7 +167,8 @@ if __name__ == "__main__":
                     trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
                     model_time, n_batches = train_cnn_full(model_type, trn_loader, device)
 
-                    stats[bench_key][cuda_key] = {}
+                    if cuda_key not in stats[bench_key]:
+                        stats[bench_key][cuda_key] = {}
                     stats[bench_key][cuda_key][model_type] = {}
                     stats[bench_key][cuda_key][model_type]["time"] = model_time
                     stats[bench_key][cuda_key][model_type]["batches"] = n_batches
@@ -181,7 +188,8 @@ if __name__ == "__main__":
                 trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
                 model_time, n_batches = train_cnn_gpu_only(model_type, trn_loader, device)
 
-                stats[bench_key][cuda_key] = {}
+                if cuda_key not in stats[bench_key]:
+                    stats[bench_key][cuda_key] = {}
                 stats[bench_key][cuda_key][model_type] = {}
                 stats[bench_key][cuda_key][model_type]["time"] = model_time
                 stats[bench_key][cuda_key][model_type]["batches"] = n_batches
@@ -201,7 +209,8 @@ if __name__ == "__main__":
                 trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
                 model_time, n_batches = train_cnn_ram(model_type, trn_loader, device)
 
-                stats[bench_key][cuda_key] = {}
+                if cuda_key not in stats[bench_key]:
+                    stats[bench_key][cuda_key] = {}
                 stats[bench_key][cuda_key][model_type] = {}
                 stats[bench_key][cuda_key][model_type]["time"] = model_time
                 stats[bench_key][cuda_key][model_type]["batches"] = n_batches
@@ -209,8 +218,6 @@ if __name__ == "__main__":
 
                 print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
-
-    print(stats)
 
     with open("log.txt", "w") as outf:
         outf.write(json.dumps(stats, sort_keys=True, indent=4, separators=(',', ': ')))
