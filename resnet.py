@@ -218,7 +218,7 @@ def resnet152(pretrained=False, **kwargs):
     return model
 
 
-def make_resnet(key):
+def make_model(key):
     d = {}
     d["resnet18"] = resnet18
     d["resnet34"] = resnet34
