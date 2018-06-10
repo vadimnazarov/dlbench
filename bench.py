@@ -188,6 +188,10 @@ if __name__ == "__main__":
             print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
 
+    with open("log.txt", "w") as outf:
+        for key, subkey in sorted(stats.items(), key=lambda x: x[0]):
+            for subkey, item in sorted(stats[subkey].items(), key=lambda x: x[0]):
+                outf.write("\t".join(key, subkey, item) + "\n")
 
 """
 0.04
