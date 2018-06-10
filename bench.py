@@ -5,6 +5,7 @@ from torch import optim
 
 import time
 import sys
+import json
 from argparse import ArgumentParser
 import multiprocessing as mp
 
@@ -189,9 +190,7 @@ if __name__ == "__main__":
         print()
 
     with open("log.txt", "w") as outf:
-        for key, subdict in sorted(stats.items(), key=lambda x: x[0]):
-            for subkey, item in sorted(subdict.items(), key=lambda x: x[0]):
-                outf.write("\t".join([key, subkey, str(item)]) + "\n")
+        outf.write(json.dumps(stats, sort_keys=True, indent=4, separators=(',', ': ')))
 
 """
 0.04
