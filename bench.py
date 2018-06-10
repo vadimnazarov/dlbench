@@ -67,11 +67,9 @@ def train_cnn_gpu_only(trn_loader, tst_loader, device="cuda:0"):
 
     dataset = []
     for batch, labels in trn_loader:
-        batch, labels = batch.to(device), labels.to(device)
-        dataset.append((batch, labels))
+        dataset.append((batch.to(device), labels.to(device)))
     for batch, labels in trn_loader:
-        batch, labels = batch.to(device), labels.to(device)
-        dataset.append((batch, labels))
+        dataset.append((batch.to(device), labels.to(device)))
 
     start = time.time()
     for batch_i, (batch, labels) in enumerate(dataset):
