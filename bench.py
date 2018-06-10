@@ -134,10 +134,9 @@ if __name__ == "__main__":
         model_list = ["ResNet18", "ResNet152"] 
 
         print("CIFAR10 benchmark (full pipeline)")
-        bench_key = "full"
         for model_type in model_list:
             for num_workers in range(0, mp.cpu_count()):
-                bench_key = bench_key + str(num_workers)
+                bench_key = "full" + str(num_workers)
                 stats[bench_key] = {}
 
                 print("[" + model_type + " #workers ", num_workers, "]", sep="")
