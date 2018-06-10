@@ -61,7 +61,7 @@ def download_cifar10(data_path):
 #
 # https://github.com/wang-chen/KervNets/blob/master/cifar-10.py
 #
-def make_cifar10_dataset(data_path, batch_size, test_batch_size, distributed=False, num_workers=0):
+def make_cifar10_dataset(data_path, batch_size, distributed=False, num_workers=0):
     transform_train = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
         transforms.ColorJitter(.25,.25,.25),
