@@ -87,11 +87,11 @@ def make_cifar10_dataset(data_path, batch_size, test_batch_size, distributed=Fal
 num_workers=args.workers, pin_memory=True, sampler=train_sampler)
     """
 
-    test_folder = os.path.join(data_path, 'test')
-    test_data = torchvision.datasets.ImageFolder(test_folder, transform_test)
-    testloader = torch.utils.data.DataLoader(test_data, batch_size=test_batch_size, shuffle=False, pin_memory=True, num_workers=num_workers)
+    # test_folder = os.path.join(data_path, 'test')
+    # test_data = torchvision.datasets.ImageFolder(test_folder, transform_test)
+    # testloader = torch.utils.data.DataLoader(test_data, batch_size=test_batch_size, shuffle=False, pin_memory=True, num_workers=num_workers)
 
-    return trainloader, testloader
+    return trainloader
 
 
 

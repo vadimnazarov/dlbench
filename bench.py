@@ -6,6 +6,7 @@ from torch import optim
 import time
 import sys
 from argparse import ArgumentParser
+import multiprocessing as mp
 
 from utils import *
 from resnet import *
@@ -73,27 +74,20 @@ if __name__ == "__main__":
     print(" - download time:", round(download_time, 3))
     print(" - untar time:", round(untar_time, 3))
 
-    trn_loader, tst_loader = make_cifar10_dataset(args.d, args.b, 1024, distributed=False, num_workers=3)
-
     print("Simple DNN benchmark")
     model_time = train_dnn(args.b, args.n, args.f)
     print("  cpu:", model_time, "sec / 10*batch")
 
-    if torch.cuda.device_count():
-        print("[CUDNN benchmark OFF]")
-        torch.backends.cudnn.benchmark = False
+    if torch.cuda.device_count() and torch.backends.cudnn.enabled:
+        torch.backends.cudnn.benchmark = True
         for device in range(torch.cuda.device_count()):
             model_time = train_dnn(args.b, args.n, args.f, device)
             print("  cuda:" + str(device), model_time, "sec / 10*batch")
-            
-        if torch.backends.cudnn.enabled:
-            print("[CUDNN benchmark ON]")
-            torch.backends.cudnn.benchmark = True
-            for device in range(torch.cuda.device_count()):
-                model_time = train_dnn(args.b, args.n, args.f, device)
-                print("  cuda:" + str(device), model_time, "sec / 10*batch")
 
-            print("ResNet50 CIFAR10 benchmark")
+        print("CIFAR10 benchmark")
+        for num_workers in range(0, mp.cpu_count())
+            print("[ResNet50, #workers ", num_workers, "]", sep="")
+            trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
             for device in range(torch.cuda.device_count()):
                 model_time = train_cnn(trn_loader, tst_loader, device)
                 print("  cuda:" + str(device), model_time, "sec / 10*batch")
