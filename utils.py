@@ -76,7 +76,8 @@ def make_cifar10_dataset(data_path, batch_size, test_batch_size, distributed=Fal
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
 
-    train_data = torchvision.datasets.CIFAR10(root=data_path+"/train/", train=True, download=False, transform=transform_train)
+    train_folder = os.path.join(data_path, 'train')
+    train_data = torchvision.datasets.ImageFolder(train_folder, transform_train)
     trainloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=num_workers) #pin_memory=True
     """
     train_sampler = (torch.utils.data.distributed.DistributedSampler(train_dataset)
@@ -86,7 +87,8 @@ def make_cifar10_dataset(data_path, batch_size, test_batch_size, distributed=Fal
 num_workers=args.workers, pin_memory=True, sampler=train_sampler)
     """
 
-    test_data = torchvision.datasets.CIFAR10(root=data_path+"/test/", train=False, download=False, transform=transform_test)
+    test_folder = os.path.join(data_path, 'test')
+    test_data = torchvision.datasets.ImageFolder(test_folder, transform_test)
     testloader = torch.utils.data.DataLoader(test_data, batch_size=test_batch_size, shuffle=False, num_workers=num_workers) #pin_memory=True
 
     return trainloader, testloader
