@@ -140,7 +140,7 @@ if __name__ == "__main__":
         #     print("  cuda:" + str(device), model_time, "sec / 10*batch")
         # print()
 
-        print("CIFAR10 benchmark (full)")
+        print("CIFAR10 benchmark (full pipeline)")
         for num_workers in range(0, mp.cpu_count()):
             print("[ResNet50, #workers ", num_workers, "]", sep="")
             trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
@@ -149,7 +149,7 @@ if __name__ == "__main__":
                 print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
 
-        print("CIFAR10 benchmark (GPU only)")
+        print("CIFAR10 benchmark (GPU speed only)")
         print("[ResNet50]")
         trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
         for device in range(torch.cuda.device_count()):
@@ -157,7 +157,7 @@ if __name__ == "__main__":
             print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
 
-        print("CIFAR10 benchmark (RAM)")
+        print("CIFAR10 benchmark (RAM -> GPU data transfer)")
         print("[ResNet50]")
         trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
         for device in range(torch.cuda.device_count()):
