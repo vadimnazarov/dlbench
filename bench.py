@@ -56,18 +56,42 @@ def train_cnn_full(trn_loader, tst_loader, device="cuda:0"):
     return round((end - start) / batch_i, 3), batch_i
 
 
-def train_cnn_no_cpu(trn_loader, tst_loader, device="cuda:0"):
+def train_cnn_gpu_only(trn_loader, tst_loader, device="cuda:0"):
     assert device != "cpu"
     model = resnet50()
     model.to(device)
 
     optimizer = optim.Adam(model.parameters())
 
-    batch, labels = next(trn_loader)
-    batch, labels = batch.to(device), labels.to(device)
+    for batch, labels in trn_loader:
+        batch, labels = batch.to(device), labels.to(device)
+        break
 
     start = time.time()
     for batch_i in range(200):
+        preds = model(batch)
+        loss = F.cross_entropy(preds, labels)
+        loss.backward()
+        optimizer.step()
+    end = time.time()
+
+    return round((end - start) / batch_i, 3), batch_i
+
+
+def train_cnn_ram(trn_loader, tst_loader, device="cuda:0"):
+    assert device != "cpu"
+    model = resnet50()
+    model.to(device)
+
+    optimizer = optim.Adam(model.parameters())
+
+    dataset = []
+    for batch in enumerate(trn_loader):
+        dataset.append(batch)
+
+    start = time.time()
+    for batch_i, (batch, labels) in enumerate(dataset):
+        batch, labels = batch.to(device), labels.to(device)
         preds = model(batch)
         loss = F.cross_entropy(preds, labels)
         loss.backward()
@@ -89,11 +113,13 @@ if __name__ == "__main__":
     print("  CUDA:  ", torch.cuda.is_available())
     print("  CUDNN: ", torch.backends.cudnn.enabled)
     print("  #GPUs: ", torch.cuda.device_count())
+    print()
 
     print("CIFAR10 dataset")
     download_time, untar_time = download_cifar10(args.d)
     print(" - download time:", round(download_time, 3))
     print(" - untar time:", round(untar_time, 3))
+    print()
 
     print("Simple DNN benchmark")
     model_time = train_dnn(args.b, args.n, args.f)
@@ -104,6 +130,7 @@ if __name__ == "__main__":
         for device in range(torch.cuda.device_count()):
             model_time = train_dnn(args.b, args.n, args.f, device)
             print("  cuda:" + str(device), model_time, "sec / 10*batch")
+        print()
 
         print("CIFAR10 benchmark (full)")
         for num_workers in range(0, mp.cpu_count()):
@@ -112,13 +139,22 @@ if __name__ == "__main__":
             for device in range(torch.cuda.device_count()):
                 model_time, n_batches = train_cnn_full(trn_loader, device)
                 print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
+        print()
 
-        print("CIFAR10 benchmark (No CPU)")
+        print("CIFAR10 benchmark (GPU only)")
         for num_workers in range(0, mp.cpu_count()):
             print("[ResNet50, #workers ", num_workers, "]", sep="")
             trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
             for device in range(torch.cuda.device_count()):
-                model_time, n_batches = train_cnn_no_cpu(trn_loader, device)
+                model_time, n_batches = train_cnn_gpu_only(trn_loader, device)
+                print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
+
+        print("CIFAR10 benchmark (RAM)")
+        for num_workers in range(0, mp.cpu_count()):
+            print("[ResNet50, #workers ", num_workers, "]", sep="")
+            trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
+            for device in range(torch.cuda.device_count()):
+                model_time, n_batches = train_cnn_ram(trn_loader, device)
                 print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
 
 
