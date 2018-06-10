@@ -216,3 +216,13 @@ def resnet152(pretrained=False, **kwargs):
     if pretrained:
         model.load_state_dict(model_zoo.load_url(model_urls['resnet152']))
     return model
+
+
+def make_resnet(key):
+    d = {}
+    d["resnet18"] = resnet18
+    d["resnet34"] = resnet34
+    d["resnet50"] = resnet50
+    d["resnet101"] = resnet101
+    d["resnet152"] = resnet152
+    return d[key]()

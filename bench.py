@@ -38,11 +38,9 @@ def train_dnn(batch_size, n_batches, n_features, device="cpu"):
     return round((end - start) / (n_batches / 10), 3)
 
 
-def train_cnn_full(trn_loader, tst_loader, device="cuda:0"):
+def train_cnn_full(model_type, trn_loader, tst_loader, device="cuda:0"):
     assert device != "cpu"
-    # model = resnet50()
-    model = resnet18()
-    model.to(device)
+    model = make_model(model_type.lower()).to(device)
 
     optimizer = optim.Adam(model.parameters())
 
@@ -59,11 +57,9 @@ def train_cnn_full(trn_loader, tst_loader, device="cuda:0"):
     return round((end - start) / batch_i, 3), batch_i
 
 
-def train_cnn_gpu_only(trn_loader, tst_loader, device="cuda:0"):
+def train_cnn_gpu_only(model_type, trn_loader, tst_loader, device="cuda:0"):
     assert device != "cpu"
-    # model = resnet50()
-    model = resnet18()
-    model.to(device)
+    model = make_model(model_type.lower()).to(device)
 
     optimizer = optim.Adam(model.parameters())
 
@@ -85,11 +81,9 @@ def train_cnn_gpu_only(trn_loader, tst_loader, device="cuda:0"):
     return round((end - start) / batch_i, 3), batch_i
 
 
-def train_cnn_ram(trn_loader, tst_loader, device="cuda:0"):
+def train_cnn_ram(model_type, trn_loader, tst_loader, device="cuda:0"):
     assert device != "cpu"
-    # model = resnet50()
-    model = resnet18()
-    model.to(device)
+    model = make_model(model_type.lower()).to(device)
 
     optimizer = optim.Adam(model.parameters())
 
@@ -144,12 +138,14 @@ if __name__ == "__main__":
         #     print("  cuda:" + str(device), model_time, "sec / 10*batch")
         # print()
 
+        model_type = "ResNet18"
+
         print("CIFAR10 benchmark (full pipeline)")
         for num_workers in range(0, mp.cpu_count()):
-            print("[ResNet101, #workers ", num_workers, "]", sep="")
+            print("[" + model_type + " #workers ", num_workers, "]", sep="")
             for device in range(torch.cuda.device_count()):
                 trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
-                model_time, n_batches = train_cnn_full(trn_loader, device)
+                model_time, n_batches = train_cnn_full(model_type, trn_loader, device)
 
                 key = "cuda:" + str(device)
                 stats[key] = {}
@@ -161,10 +157,10 @@ if __name__ == "__main__":
         print()
 
         print("CIFAR10 benchmark (GPU speed only)")
-        print("[ResNet101]")
+        print("[" + model_type + "]")
         for device in range(torch.cuda.device_count()):
             trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
-            model_time, n_batches = train_cnn_gpu_only(trn_loader, device)
+            model_time, n_batches = train_cnn_gpu_only(model_type, trn_loader, device)
 
             key = "cuda:" + str(device)
             stats[key]["time"] = model_time
@@ -175,10 +171,10 @@ if __name__ == "__main__":
         print()
 
         print("CIFAR10 benchmark (RAM -> GPU data transfer)")
-        print("[ResNet101]")
+        print("[" + model_type + "]")
         for device in range(torch.cuda.device_count()):
             trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
-            model_time, n_batches = train_cnn_ram(trn_loader, device)
+            model_time, n_batches = train_cnn_ram(model_type, trn_loader, device)
 
             key = "cuda:" + str(device)
             stats[key]["time"] = model_time
