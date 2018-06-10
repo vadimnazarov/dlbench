@@ -137,7 +137,8 @@ if __name__ == "__main__":
         bench_key = "full"
         for model_type in model_list:
             for num_workers in range(0, mp.cpu_count()):
-                stats[bench_key + str(num_workers)] = {}
+                bench_key = bench_key + str(num_workers)
+                stats[bench_key] = {}
 
                 print("[" + model_type + " #workers ", num_workers, "]", sep="")
                 for device in range(torch.cuda.device_count()):
