@@ -82,7 +82,7 @@ def make_cifar10_dataset(data_path, batch_size, distributed=False, num_workers=0
 
     train_folder = os.path.join(data_path, 'train')
     train_data = torchvision.datasets.ImageFolder(train_folder, transform_train)
-    trainloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True, pin_memory=False, num_workers=num_workers)
+    trainloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=num_workers)
     """
     train_sampler = (torch.utils.data.distributed.DistributedSampler(train_dataset)
                      if distributed else None)
