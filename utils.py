@@ -14,7 +14,7 @@ import torch
 import torch.utils.data
 import torch.utils.data.distributed
 import torchvision
-import torchvision.transforms
+import torchvision.transforms as transforms
 
 
 class TqdmUpTo(tqdm):
@@ -61,7 +61,7 @@ def download_cifar10(data_path):
 # https://github.com/wang-chen/KervNets/blob/master/cifar-10.py
 #
 def make_cifar10_dataset(data_path, batch_size, test_batch_size, distributed=False, num_workers=0):
-    transform_train = torchvision.transforms.Compose([
+    transform_train = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
         transforms.ColorJitter(.25,.25,.25),
         transforms.RandomRotation(2),
@@ -70,7 +70,7 @@ def make_cifar10_dataset(data_path, batch_size, test_batch_size, distributed=Fal
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
 
-    transform_test = torchvision.transforms.Compose([
+    transform_test = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
