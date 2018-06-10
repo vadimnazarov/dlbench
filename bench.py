@@ -168,50 +168,32 @@ if __name__ == "__main__":
                     print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
 
-        # print("CIFAR10 benchmark (GPU speed only)")
-        # bench_key = "speed"
-        # stats[bench_key] = {}
-        # for model_type in model_list:
-        #     print("[" + model_type + "]")
-        #     for device in range(torch.cuda.device_count()):
-        #         cuda_key = "cuda:" + str(device)
+        print("CIFAR10 benchmark (GPU speed only)")
+        for model_type in model_list:
+            print("[" + model_type + "]")
+            for device in range(torch.cuda.device_count()):
+                trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
+                model_time, n_batches = train_cnn_gpu_only(model_type, trn_loader, device)
 
-        #         trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
-        #         model_time, n_batches = train_cnn_gpu_only(model_type, trn_loader, device)
+                add_item(stats, "speed", "cuda:" + str(device), 
+                         model_type, model_time, n_batches, args.b * n_batches)
 
-        #         if cuda_key not in stats[bench_key]:
-        #             stats[bench_key][cuda_key] = {}
-        #         stats[bench_key][cuda_key][model_type] = {}
-        #         stats[bench_key][cuda_key][model_type]["time"] = model_time
-        #         stats[bench_key][cuda_key][model_type]["batches"] = n_batches
-        #         stats[bench_key][cuda_key][model_type]["images"] = args.b * n_batches
+                print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
+        print()
 
-        #         print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
-        # print()
+        print("CIFAR10 benchmark (RAM -> GPU data transfer)")
+        for model_type in model_list:
+            print("[" + model_type + "]")
+            for device in range(torch.cuda.device_count()):
+                trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
+                model_time, n_batches = train_cnn_ram(model_type, trn_loader, device)
 
-        # print("CIFAR10 benchmark (RAM -> GPU data transfer)")
-        # bench_key = "transfer"
-        # stats[bench_key] = {}
-        # for model_type in model_list:
-        #     print("[" + model_type + "]")
-        #     for device in range(torch.cuda.device_count()):
-        #         cuda_key = "cuda:" + str(device)
+                add_item(stats, "transfer", "cuda:" + str(device), 
+                         model_type, model_time, n_batches, args.b * n_batches)
 
-        #         trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
-        #         model_time, n_batches = train_cnn_ram(model_type, trn_loader, device)
+                print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
+        print()
 
-        #         if cuda_key not in stats[bench_key]:
-        #             stats[bench_key][cuda_key] = {}
-        #         stats[bench_key][cuda_key][model_type] = {}
-        #         stats[bench_key][cuda_key][model_type]["time"] = model_time
-        #         stats[bench_key][cuda_key][model_type]["batches"] = n_batches
-        #         stats[bench_key][cuda_key][model_type]["images"] = args.b * n_batches
-
-        #         print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
-        # print()
-
-    # with open("log.txt", "w") as outf:
-    #     outf.write(json.dumps(stats, sort_keys=True, indent=4, separators=(',', ': ')))
     print(json_normalize(stats))
 
 """
