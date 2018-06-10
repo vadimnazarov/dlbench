@@ -53,7 +53,7 @@ def train_cnn(trn_loader, tst_loader, device="cuda:0"):
         optimizer.step()
     end = time.time()
 
-    return round((end - start) / (batch_i / 10), 3), batch_i
+    return round((end - start) / batch_i, 3), batch_i
 
 
 if __name__ == "__main__":
@@ -90,6 +90,18 @@ if __name__ == "__main__":
             trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
             for device in range(torch.cuda.device_count()):
                 model_time, n_batches = train_cnn(trn_loader, device)
-                print("  cuda:" + str(device), model_time, "sec / 10*batch  (" + str(n_batches) + "batches, " + str(args.b * n_batches) + "images)")
+                print("  cuda:" + str(device), model_time, "sec / batch  (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
 
 
+
+0.4
+sec / 10batches
+
+0.4*39
+sec for full epoch
+
+49920 / 0.4*39
+image / sec
+
+1000000 * (49920 / 0.4*39)
+millions of image / sec
