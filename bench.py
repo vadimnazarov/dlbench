@@ -41,6 +41,8 @@ def train_dnn(batch_size, n_batches, n_features, device="cpu"):
 
 def train_cnn_full(model_type, trn_loader, tst_loader, device="cuda:0"):
     assert device != "cpu"
+    if type(device) is int:
+        device = "cuda:" + str(device)
     model = make_model(model_type.lower()).to(device)
 
     optimizer = optim.Adam(model.parameters())
@@ -63,6 +65,8 @@ def train_cnn_full(model_type, trn_loader, tst_loader, device="cuda:0"):
 
 def train_cnn_gpu_only(model_type, trn_loader, tst_loader, device="cuda:0"):
     assert device != "cpu"
+    if type(device) is int:
+        device = "cuda:" + str(device)
     model = make_model(model_type.lower()).to(device)
 
     optimizer = optim.Adam(model.parameters())
@@ -90,6 +94,8 @@ def train_cnn_gpu_only(model_type, trn_loader, tst_loader, device="cuda:0"):
 
 def train_cnn_ram(model_type, trn_loader, tst_loader, device="cuda:0"):
     assert device != "cpu"
+    if type(device) is int:
+        device = "cuda:" + str(device)
     model = make_model(model_type.lower()).to(device)
 
     optimizer = optim.Adam(model.parameters())
