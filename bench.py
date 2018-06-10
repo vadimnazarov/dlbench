@@ -41,9 +41,9 @@ def train_dnn(batch_size, n_batches, n_features, device="cpu"):
 
 def train_cnn_full(model_type, trn_loader, tst_loader, device="cuda:0"):
     assert device != "cpu"
-    # print(device)
-    # if type(device) is int:
-    #     device = "cuda:" + str(device)
+    print(device)
+    if type(device) is int:
+        device = "cuda:" + str(device)
     print(device)
     model = make_model(model_type.lower()).to("cuda:1")
 
@@ -51,7 +51,7 @@ def train_cnn_full(model_type, trn_loader, tst_loader, device="cuda:0"):
 
     start = time.time()
     for batch_i, (batch, labels) in enumerate(trn_loader):
-        batch, labels = batch.to("cuda:1"), labels.to("cuda:1")
+        batch, labels = batch.to(), labels.to()
         if batch_i == 0:
             print("batch device:", batch.device)
         preds = model(batch)
