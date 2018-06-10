@@ -34,6 +34,7 @@ def train_dnn(batch_size, n_batches, n_features, device="cpu"):
         optimizer.step()
     end = time.time()
 
+    batch_i += 1
     return round((end - start) / (n_batches / 10), 3)
 
 
@@ -53,6 +54,7 @@ def train_cnn_full(trn_loader, tst_loader, device="cuda:0"):
         optimizer.step()
     end = time.time()
 
+    batch_i += 1
     return round((end - start) / batch_i, 3), batch_i
 
 
@@ -75,6 +77,7 @@ def train_cnn_gpu_only(trn_loader, tst_loader, device="cuda:0"):
         optimizer.step()
     end = time.time()
 
+    batch_i += 1
     return round((end - start) / batch_i, 3), batch_i
 
 
@@ -86,7 +89,7 @@ def train_cnn_ram(trn_loader, tst_loader, device="cuda:0"):
     optimizer = optim.Adam(model.parameters())
 
     dataset = []
-    for batch in enumerate(trn_loader):
+    for batch in trn_loader:
         dataset.append(batch)
 
     start = time.time()
@@ -98,6 +101,7 @@ def train_cnn_ram(trn_loader, tst_loader, device="cuda:0"):
         optimizer.step()
     end = time.time()
 
+    batch_i += 1
     return round((end - start) / batch_i, 3), batch_i
 
 
@@ -121,16 +125,16 @@ if __name__ == "__main__":
     print(" - untar time:", round(untar_time, 3))
     print()
 
-    print("Simple DNN benchmark")
-    model_time = train_dnn(args.b, args.n, args.f)
-    print("  cpu:", model_time, "sec / 10*batch")
+    # print("Simple DNN benchmark")
+    # model_time = train_dnn(args.b, args.n, args.f)
+    # print("  cpu:", model_time, "sec / 10*batch")
 
     if torch.cuda.device_count() and torch.backends.cudnn.enabled:
         torch.backends.cudnn.benchmark = True
-        for device in range(torch.cuda.device_count()):
-            model_time = train_dnn(args.b, args.n, args.f, device)
-            print("  cuda:" + str(device), model_time, "sec / 10*batch")
-        print()
+        # for device in range(torch.cuda.device_count()):
+        #     model_time = train_dnn(args.b, args.n, args.f, device)
+        #     print("  cuda:" + str(device), model_time, "sec / 10*batch")
+        # print()
 
         print("CIFAR10 benchmark (full)")
         for num_workers in range(0, mp.cpu_count()):
@@ -143,7 +147,7 @@ if __name__ == "__main__":
 
         print("CIFAR10 benchmark (GPU only)")
         for num_workers in range(0, mp.cpu_count()):
-            print("[ResNet50, #workers ", num_workers, "]", sep="")
+            print("[ResNet50]")
             trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
             for device in range(torch.cuda.device_count()):
                 model_time, n_batches = train_cnn_gpu_only(trn_loader, device)
