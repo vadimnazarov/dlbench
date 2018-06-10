@@ -210,9 +210,9 @@ if __name__ == "__main__":
         #         print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         # print()
 
-    with open("log.txt", "w") as outf:
-        outf.write(json.dumps(stats, sort_keys=True, indent=4, separators=(',', ': ')))
-    print(json_normalize([stats]))
+    # with open("log.txt", "w") as outf:
+    #     outf.write(json.dumps(stats, sort_keys=True, indent=4, separators=(',', ': ')))
+    print(json_normalize(stats))
 
 """
 0.04
