@@ -29,8 +29,9 @@ def get_data(url, filename):
         if not os.path.exists(dirname):
             os.makedirs(dirname)
 
-        with TqdmUpTo(unit='B', unit_scale=True, miniters=1, desc=url.split('/')[-1]) as t:
-            urlretrieve(url, filename, reporthook=t.update_to)
+        # with TqdmUpTo(unit='B', unit_scale=True, miniters=1, desc=url.split('/')[-1]) as t:
+        #     urlretrieve(url, filename, reporthook=t.update_to)
+        urlretrieve(url, filename)
 
 
 def download_cifar10(data_path):
