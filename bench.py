@@ -1,13 +1,15 @@
-import torch
-import torch.nn.functional as F
-from torch import nn
-from torch import optim
-
 import time
 import sys
 import json
 from argparse import ArgumentParser
 import multiprocessing as mp
+
+from pandas.io.json import json_normalize
+
+import torch
+import torch.nn.functional as F
+from torch import nn
+from torch import optim
 
 from utils import *
 from resnet import make_model
@@ -54,6 +56,7 @@ def train_cnn_full(model_type, trn_loader, device="cuda:0"):
         loss = F.cross_entropy(preds, labels)
         loss.backward()
         optimizer.step()
+        break
     end = time.time()
 
     batch_i += 1
@@ -80,6 +83,7 @@ def train_cnn_gpu_only(model_type, trn_loader, device="cuda:0"):
         loss = F.cross_entropy(preds, labels)
         loss.backward()
         optimizer.step()
+        break
     end = time.time()
 
     batch_i += 1
@@ -107,6 +111,7 @@ def train_cnn_ram(model_type, trn_loader, device="cuda:0"):
         loss = F.cross_entropy(preds, labels)
         loss.backward()
         optimizer.step()
+        break
     end = time.time()
 
     batch_i += 1
@@ -206,6 +211,7 @@ if __name__ == "__main__":
 
     with open("log.txt", "w") as outf:
         outf.write(json.dumps(stats, sort_keys=True, indent=4, separators=(',', ': ')))
+    print(json_normalize(stats))
 
 """
 0.04
