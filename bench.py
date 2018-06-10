@@ -52,6 +52,8 @@ def train_cnn(trn_loader, tst_loader, device="cuda:0"):
         optimizer.step()
     end = time.time()
 
+    return round((end - start) / (n_batches / 10), 3)
+
 
 if __name__ == "__main__":
     parser = ArgumentParser()
