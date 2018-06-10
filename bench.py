@@ -85,7 +85,7 @@ if __name__ == "__main__":
             print("  cuda:" + str(device), model_time, "sec / 10*batch")
 
         print("CIFAR10 benchmark")
-        for num_workers in range(0, mp.cpu_count())
+        for num_workers in range(0, mp.cpu_count()):
             print("[ResNet50, #workers ", num_workers, "]", sep="")
             trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
             for device in range(torch.cuda.device_count()):
