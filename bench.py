@@ -53,7 +53,7 @@ def train_cnn_full(model_type, trn_loader, tst_loader, device="cuda:0"):
     for batch_i, (batch, labels) in enumerate(trn_loader):
         batch, labels = batch.to("cuda:1"), labels.to("cuda:1")
         if batch_i == 0:
-            print(batch.device)
+            print("batch device:", batch.device)
         preds = model(batch)
         loss = F.cross_entropy(preds, labels)
         loss.backward()
