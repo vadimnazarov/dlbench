@@ -7,8 +7,11 @@ import time
 import sys
 from argparse import ArgumentParser
 
+from utils import *
+from resnet import *
 
-def train(batch_size, n_batches, n_features, device="cpu"):
+
+def train_dnn(batch_size, n_batches, n_features, device="cpu"):
 	layers = []
 	layers.append(nn.Linear(n_features, 64))
 	layers.append(nn.Linear(64, 64))
@@ -24,17 +27,28 @@ def train(batch_size, n_batches, n_features, device="cpu"):
 
 	start = time.time()
 	for i in range(n_batches):
-		# batch_x = torch.FloatTensor([_ for _ in range(n_features * batch_size)]).random_(-1, 1).reshape((batch_size, n_features)).to(device)
-		# batch_y = torch.normal(torch.FloatTensor([_ for _ in range(batch_size)])).to(device)
-		if i == 0:
-			print(batch_x.device, batch_y.device)
 		pred = model(batch_x)
 		loss = F.mse_loss(batch_y, pred)
 		loss.backward()
 		optimizer.step()
 	end = time.time()
 
-	print((end - start) / (n_batches / 10), "s / 10*batch")
+	return round((end - start) / (n_batches / 10), 3)
+
+
+def train_cnn(trn_loader, tst_loader, device="cpu"):
+	model = resnet50()
+	model.to(device)
+
+	optimizer = optim.Adam(model.parameters())
+
+	start = time.time()
+	for batch_i, (batch, labels) in enumerate(trn_loader):
+		preds = model(batch)
+		loss = F.categorical_cross_entropy(preds, labels)
+		loss.backward()
+		optimizer.step()
+	end = time.time()
 
 
 if __name__ == "__main__":
@@ -42,27 +56,44 @@ if __name__ == "__main__":
 	parser.add_argument("-b", default=64, help="batch size", type=int)
 	parser.add_argument("-n", default=100, help="number of batches", type=int)
 	parser.add_argument("-f", default=5000, help="number of features", type=int)
+	parser.add_argument("-d", default="./data/", help="data folder path", type=str)
 	args = parser.parse_args()
 
 	print("Deep Learning Benchmark")
-	print()
-	print(" - CUDA?", torch.cuda.is_available())
-	print(" - CUDNN?", torch.backends.cudnn.enabled)
-	print(" - #devices", torch.cuda.device_count())
+	print("  CUDA:  ", torch.cuda.is_available())
+	print("  CUDNN: ", torch.backends.cudnn.enabled)
+	print("  #GPUs: ", torch.cuda.device_count())
 
-	print("CPU")
-	train(args.b, args.n, args.f)
+	print("CIFAR10 dataset")
+	download_time, untar_time = download_cifar10(args.d)
+	print(" - download time:", round(download_time, 3))
+	print(" - untar time:", round(untar_time, 3))
+
+	trn_loader, tst_loader = make_cifar10_dataset(args.d, args.b, 1024, distributed=False, num_workers=0)
+
+	print("Simple DNN benchmark")
+	model_time = train_dnn(args.b, args.n, args.f)
+	print("  cpu:", model_time, "sec / 10*batch")
+	model_time = train_cnn(trn_loader, tst_loader, device)
+	print("  cpu:", model_time, "sec / 10*batch")
 
 	if torch.cuda.device_count():
-		print("CUDNN benchmark OFF")
+		print("[CUDNN benchmark OFF]")
 		torch.backends.cudnn.benchmark = False
 		for device in range(torch.cuda.device_count()):
-			print("GPU", device)
-			train(args.b, args.n, args.f, device)
-
+			model_time = train_dnn(args.b, args.n, args.f, device)
+			print("  cuda:" + str(device), model_time, "sec / 10*batch")
+			
 		if torch.backends.cudnn.enabled:
-			print("CUDNN benchmark ON")
+			print("[CUDNN benchmark ON]")
 			torch.backends.cudnn.benchmark = True
 			for device in range(torch.cuda.device_count()):
-				print("GPU", device)
-				train(args.b, args.n, args.f, device)
+				model_time = train_dnn(args.b, args.n, args.f, device)
+				print("  cuda:" + str(device), model_time, "sec / 10*batch")
+
+			print("ResNet50 CIFAR10 benchmark")
+			for device in range(torch.cuda.device_count()):
+				model_time = train_cnn(trn_loader, tst_loader, device)
+				print("  cuda:" + str(device), model_time, "sec / 10*batch")
+
+
