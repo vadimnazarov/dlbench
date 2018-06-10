@@ -74,8 +74,6 @@ if __name__ == "__main__":
 	print("Simple DNN benchmark")
 	model_time = train_dnn(args.b, args.n, args.f)
 	print("  cpu:", model_time, "sec / 10*batch")
-	model_time = train_cnn(trn_loader, tst_loader)
-	print("  cpu:", model_time, "sec / 10*batch")
 
 	if torch.cuda.device_count():
 		print("[CUDNN benchmark OFF]")
