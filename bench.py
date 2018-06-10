@@ -69,6 +69,9 @@ def train_cnn_gpu_only(trn_loader, tst_loader, device="cuda:0"):
     for batch, labels in trn_loader:
         batch, labels = batch.to(device), labels.to(device)
         dataset.append((batch, labels))
+    for batch, labels in trn_loader:
+        batch, labels = batch.to(device), labels.to(device)
+        dataset.append((batch, labels))
 
     start = time.time()
     for batch_i, (batch, labels) in enumerate(dataset):
@@ -90,6 +93,8 @@ def train_cnn_ram(trn_loader, tst_loader, device="cuda:0"):
     optimizer = optim.Adam(model.parameters())
 
     dataset = []
+    for batch in trn_loader:
+        dataset.append(batch)
     for batch in trn_loader:
         dataset.append(batch)
 
