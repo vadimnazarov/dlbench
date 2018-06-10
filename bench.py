@@ -191,7 +191,7 @@ if __name__ == "__main__":
     with open("log.txt", "w") as outf:
         for key, subdict in sorted(stats.items(), key=lambda x: x[0]):
             for subkey, item in sorted(subdict.items(), key=lambda x: x[0]):
-                outf.write("\t".join(key, subkey, item) + "\n")
+                outf.write("\t".join([key, subkey, str(item)]) + "\n")
 
 """
 0.04
