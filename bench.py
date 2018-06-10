@@ -53,7 +53,7 @@ def train_cnn(trn_loader, tst_loader, device="cuda:0"):
         optimizer.step()
     end = time.time()
 
-    return round((end - start) / (batch_i / 10), 3), n_batches
+    return round((end - start) / (batch_i / 10), 3), batch_i
 
 
 if __name__ == "__main__":
