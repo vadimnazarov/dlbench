@@ -36,15 +36,16 @@ def train_dnn(batch_size, n_batches, n_features, device="cpu"):
     return round((end - start) / (n_batches / 10), 3)
 
 
-def train_cnn(trn_loader, tst_loader, device="cpu"):
+def train_cnn(trn_loader, tst_loader, device="cuda:0"):
+    assert device != "cpu"
     model = resnet18()
-    if device != "cpu":
-        model.cuda(device)
+    model.to(device)
 
     optimizer = optim.Adam(model.parameters())
 
     start = time.time()
     for batch_i, (batch, labels) in enumerate(trn_loader):
+        batch, labels = batch.to(device), labels.to(device)
         preds = model(batch)
         loss = F.cross_entropy(preds, labels)
         loss.backward()
