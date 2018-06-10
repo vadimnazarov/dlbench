@@ -65,12 +65,13 @@ def train_cnn_gpu_only(trn_loader, tst_loader, device="cuda:0"):
 
     optimizer = optim.Adam(model.parameters())
 
+    dataset = []
     for batch, labels in trn_loader:
         batch, labels = batch.to(device), labels.to(device)
-        break
+        dataset.append((batch, labels))
 
     start = time.time()
-    for batch_i in range(200):
+    for batch_i, (batch, labels) in enumerate(dataset):
         preds = model(batch)
         loss = F.cross_entropy(preds, labels)
         loss.backward()
@@ -121,8 +122,8 @@ if __name__ == "__main__":
 
     print("CIFAR10 dataset")
     download_time, untar_time = download_cifar10(args.d)
-    print(" - download time:", round(download_time, 3))
-    print(" - untar time:", round(untar_time, 3))
+    print("  download time:", round(download_time, 3))
+    print("  untar time:", round(untar_time, 3))
     print()
 
     # print("Simple DNN benchmark")
