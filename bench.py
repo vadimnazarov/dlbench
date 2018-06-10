@@ -45,7 +45,7 @@ def train_cnn(trn_loader, tst_loader, device="cpu"):
 	start = time.time()
 	for batch_i, (batch, labels) in enumerate(trn_loader):
 		preds = model(batch)
-		loss = F.categorical_cross_entropy(preds, labels)
+		loss = F.cross_entropy(preds, labels)
 		loss.backward()
 		optimizer.step()
 	end = time.time()
