@@ -48,6 +48,8 @@ def train_cnn_full(model_type, trn_loader, tst_loader, device="cuda:0"):
     start = time.time()
     for batch_i, (batch, labels) in enumerate(trn_loader):
         batch, labels = batch.to(device), labels.to(device)
+        if batch_i == 0:
+            print(batch.device)
         preds = model(batch)
         loss = F.cross_entropy(preds, labels)
         loss.backward()
@@ -73,6 +75,8 @@ def train_cnn_gpu_only(model_type, trn_loader, tst_loader, device="cuda:0"):
 
     start = time.time()
     for batch_i, (batch, labels) in enumerate(dataset):
+        if batch_i == 0:
+            print(batch.device)
         preds = model(batch)
         loss = F.cross_entropy(preds, labels)
         loss.backward()
@@ -99,6 +103,8 @@ def train_cnn_ram(model_type, trn_loader, tst_loader, device="cuda:0"):
     start = time.time()
     for batch_i, (batch, labels) in enumerate(dataset):
         batch, labels = batch.to(device), labels.to(device)
+        if batch_i == 0:
+            print(batch.device)
         preds = model(batch)
         loss = F.cross_entropy(preds, labels)
         loss.backward()
