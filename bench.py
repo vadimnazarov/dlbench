@@ -9,7 +9,6 @@ from argparse import ArgumentParser
 import multiprocessing as mp
 
 from utils import *
-from resnet import *
 from resnet import make_model
 
 
@@ -139,50 +138,54 @@ if __name__ == "__main__":
         #     print("  cuda:" + str(device), model_time, "sec / 10*batch")
         # print()
 
-        model_type = "ResNet18"
+        model_list = ["ResNet18", "ResNet152"] 
 
         print("CIFAR10 benchmark (full pipeline)")
-        for num_workers in range(0, mp.cpu_count()):
-            print("[" + model_type + " #workers ", num_workers, "]", sep="")
+        for model_type in model_list:
+            for num_workers in range(0, mp.cpu_count()):
+                print("[" + model_type + " #workers ", num_workers, "]", sep="")
+                for device in range(torch.cuda.device_count()):
+                    trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
+                    model_time, n_batches = train_cnn_full(model_type, trn_loader, device)
+
+                    key = "cuda:" + str(device)
+                    stats[key] = {}
+                    stats[key][model_type] = {}
+                    stats[key][model_type]["time"] = model_time
+                    stats[key][model_type]["batches"] = n_batches
+                    stats[key][model_type]["images"] = args.b * n_batches
+
+                    print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
+        print()
+
+        print("CIFAR10 benchmark (GPU speed only)")
+        for model_type in model_list:
+            print("[" + model_type + "]")
             for device in range(torch.cuda.device_count()):
-                trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
-                model_time, n_batches = train_cnn_full(model_type, trn_loader, device)
+                trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
+                model_time, n_batches = train_cnn_gpu_only(model_type, trn_loader, device)
 
                 key = "cuda:" + str(device)
-                stats[key] = {}
-                stats[key]["time"] = model_time
-                stats[key]["batches"] = n_batches
-                stats[key]["images"] = args.b * n_batches
+                stats[key][model_type]["time"] = model_time
+                stats[key][model_type]["batches"] = n_batches
+                stats[key][model_type]["images"] = args.b * n_batches
 
                 print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
 
-        print("CIFAR10 benchmark (GPU speed only)")
-        print("[" + model_type + "]")
-        for device in range(torch.cuda.device_count()):
-            trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
-            model_time, n_batches = train_cnn_gpu_only(model_type, trn_loader, device)
-
-            key = "cuda:" + str(device)
-            stats[key]["time"] = model_time
-            stats[key]["batches"] = n_batches
-            stats[key]["images"] = args.b * n_batches
-
-            print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
-        print()
-
         print("CIFAR10 benchmark (RAM -> GPU data transfer)")
-        print("[" + model_type + "]")
-        for device in range(torch.cuda.device_count()):
-            trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
-            model_time, n_batches = train_cnn_ram(model_type, trn_loader, device)
+        for model_type in model_list:
+            print("[" + model_type + "]")
+            for device in range(torch.cuda.device_count()):
+                trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
+                model_time, n_batches = train_cnn_ram(model_type, trn_loader, device)
 
-            key = "cuda:" + str(device)
-            stats[key]["time"] = model_time
-            stats[key]["batches"] = n_batches
-            stats[key]["images"] = args.b * n_batches
+                key = "cuda:" + str(device)
+                stats[key][model_type]["time"] = model_time
+                stats[key][model_type]["batches"] = n_batches
+                stats[key][model_type]["images"] = args.b * n_batches
 
-            print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
+                print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
 
     with open("log.txt", "w") as outf:
