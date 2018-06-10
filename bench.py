@@ -113,7 +113,7 @@ def train_cnn_ram(trn_loader, tst_loader, device="cuda:0"):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("-b", default=64, help="batch size", type=int)
+    parser.add_argument("-b", default=256, help="batch size", type=int)
     parser.add_argument("-n", default=100, help="number of batches", type=int)
     parser.add_argument("-f", default=5000, help="number of features", type=int)
     parser.add_argument("-d", default="./data/", help="data folder path", type=str)
