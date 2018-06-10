@@ -73,7 +73,7 @@ if __name__ == "__main__":
     print(" - download time:", round(download_time, 3))
     print(" - untar time:", round(untar_time, 3))
 
-    trn_loader, tst_loader = make_cifar10_dataset(args.d, args.b, 1024, distributed=False, num_workers=0)
+    trn_loader, tst_loader = make_cifar10_dataset(args.d, args.b, 1024, distributed=False, num_workers=3)
 
     print("Simple DNN benchmark")
     model_time = train_dnn(args.b, args.n, args.f)
