@@ -44,17 +44,21 @@ def download_cifar10(data_path):
 
     cifar_url = 'http://files.fast.ai/data/cifar10.tgz'
 
-    start_time = time.time()
-    get_data(cifar_url, data_path+'/cifar10.tgz')
-    download_time = time.time() - start_time
+    download_time = -1
+    if not os.path.exists(data_path+'/cifar10.tgz'):
+        start_time = time.time()
+        get_data(cifar_url, data_path+'/cifar10.tgz')
+        download_time = time.time() - start_time
 
-    start_time = time.time()
-    untar_file(data_path+'/cifar10.tgz', data_path)
-    untar_time = time.time() - start_time
+    untar_time = -1
+    if not os.path.exists(data_path+'/cifar10/train'):
+        start_time = time.time()
+        untar_file(data_path+'/cifar10.tgz', data_path)
+        untar_time = time.time() - start_time
 
-    # Loader expects train and test folders to be outside of cifar10 folder
-    shutil.move(data_path+'/cifar10/train', data_path)
-    shutil.move(data_path+'/cifar10/test', data_path)
+        # Loader expects train and test folders to be outside of cifar10 folder
+        shutil.move(data_path+'/cifar10/train', data_path)
+        shutil.move(data_path+'/cifar10/test', data_path)
     return download_time, untar_time
 
 

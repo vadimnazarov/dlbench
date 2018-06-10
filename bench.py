@@ -53,7 +53,7 @@ def train_cnn(trn_loader, tst_loader, device="cuda:0"):
         optimizer.step()
     end = time.time()
 
-    return round((end - start) / (batch_i / 10), 3)
+    return round((end - start) / (batch_i / 10), 3), n_batches
 
 
 if __name__ == "__main__":
@@ -89,7 +89,7 @@ if __name__ == "__main__":
             print("[ResNet50, #workers ", num_workers, "]", sep="")
             trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
             for device in range(torch.cuda.device_count()):
-                model_time = train_cnn(trn_loader, device)
-                print("  cuda:" + str(device), model_time, "sec / 10*batch")
+                model_time, n_batches = train_cnn(trn_loader, device)
+                print("  cuda:" + str(device), model_time, "sec / 10*batch  (" + str(n_batches) + "batches, " + str(args.batch_size * n_batches) + "images)")
 
 
