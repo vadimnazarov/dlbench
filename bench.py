@@ -162,6 +162,7 @@ if __name__ == "__main__":
 
                 print("[" + model_type + " #workers ", num_workers, "]", sep="")
                 for device in range(torch.cuda.device_count()):
+                    print("wow wow device", device)
                     cuda_key = "cuda:" + str(device)
 
                     trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
