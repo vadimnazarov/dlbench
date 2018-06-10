@@ -37,7 +37,7 @@ def train_dnn(batch_size, n_batches, n_features, device="cpu"):
     return round((end - start) / (n_batches / 10), 3)
 
 
-def train_cnn(trn_loader, tst_loader, device="cuda:0"):
+def train_cnn_full(trn_loader, tst_loader, device="cuda:0"):
     assert device != "cpu"
     model = resnet50()
     model.to(device)
@@ -47,6 +47,27 @@ def train_cnn(trn_loader, tst_loader, device="cuda:0"):
     start = time.time()
     for batch_i, (batch, labels) in enumerate(trn_loader):
         batch, labels = batch.to(device), labels.to(device)
+        preds = model(batch)
+        loss = F.cross_entropy(preds, labels)
+        loss.backward()
+        optimizer.step()
+    end = time.time()
+
+    return round((end - start) / batch_i, 3), batch_i
+
+
+def train_cnn_no_cpu(trn_loader, tst_loader, device="cuda:0"):
+    assert device != "cpu"
+    model = resnet50()
+    model.to(device)
+
+    optimizer = optim.Adam(model.parameters())
+
+    batch, labels = next(trn_loader)
+    batch, labels = batch.to(device), labels.to(device)
+
+    start = time.time()
+    for batch_i in range(200):
         preds = model(batch)
         loss = F.cross_entropy(preds, labels)
         loss.backward()
@@ -84,24 +105,48 @@ if __name__ == "__main__":
             model_time = train_dnn(args.b, args.n, args.f, device)
             print("  cuda:" + str(device), model_time, "sec / 10*batch")
 
-        print("CIFAR10 benchmark")
+        print("CIFAR10 benchmark (full)")
         for num_workers in range(0, mp.cpu_count()):
             print("[ResNet50, #workers ", num_workers, "]", sep="")
             trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
             for device in range(torch.cuda.device_count()):
-                model_time, n_batches = train_cnn(trn_loader, device)
-                print("  cuda:" + str(device), model_time, "sec / batch  (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
+                model_time, n_batches = train_cnn_full(trn_loader, device)
+                print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
+
+        print("CIFAR10 benchmark (No CPU)")
+        for num_workers in range(0, mp.cpu_count()):
+            print("[ResNet50, #workers ", num_workers, "]", sep="")
+            trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
+            for device in range(torch.cuda.device_count()):
+                model_time, n_batches = train_cnn_no_cpu(trn_loader, device)
+                print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
 
 
+"""
+0.04
+sec / batch
 
-0.4
-sec / 10batches
+0.04 / 64
+sec / (batch * 64) = sec / image
 
-0.4*39
-sec for full epoch
+1 / (0.04 / 64)
+images / sec
 
-49920 / 0.4*39
-image / sec
+(60 * 60) * 1 / (0.04 / 64)
+images * 60 * 60 / sec = images / hour
 
-1000000 * (49920 / 0.4*39)
-millions of image / sec
+(60 * 60) * 1 / (0.04 / 64) / OUR_COST
+images / $
+
+(60 * 60) * 1 / (0.04 / 64) / 1000000 / OUR_COST
+million * images / $
+
+1 / 0.04
+batches / sec
+
+60*60 / 0.04
+batches / hour
+
+60*60 / OUR_COST
+batches / $
+"""
