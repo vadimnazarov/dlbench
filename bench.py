@@ -158,6 +158,7 @@ if __name__ == "__main__":
 
                     print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
+        print(stats)
 
         print("CIFAR10 benchmark (GPU speed only)")
         for model_type in model_list:
