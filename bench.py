@@ -108,7 +108,6 @@ def train_cnn_ram(model_type, trn_loader, tst_loader, device="cuda:0"):
 
 
 if __name__ == "__main__":
-    stats = {"cpu": {}}
     parser = ArgumentParser()
     parser.add_argument("-b", default=256, help="batch size", type=int)
     parser.add_argument("-n", default=100, help="number of batches", type=int)
@@ -128,64 +127,69 @@ if __name__ == "__main__":
     print("  untar time:", round(untar_time, 3))
     print()
 
-    # print("Simple DNN benchmark")
-    # model_time = train_dnn(args.b, args.n, args.f)
-    # print("  cpu:", model_time, "sec / 10*batch")
-
+    stats = {}
     if torch.cuda.device_count() and torch.backends.cudnn.enabled:
         torch.backends.cudnn.benchmark = True
-        # for device in range(torch.cuda.device_count()):
-        #     model_time = train_dnn(args.b, args.n, args.f, device)
-        #     print("  cuda:" + str(device), model_time, "sec / 10*batch")
-        # print()
 
         model_list = ["ResNet18", "ResNet152"] 
 
         print("CIFAR10 benchmark (full pipeline)")
+        bench_key = "full"
+        stats[bench_key] = {}
         for model_type in model_list:
             for num_workers in range(0, mp.cpu_count()):
                 print("[" + model_type + " #workers ", num_workers, "]", sep="")
                 for device in range(torch.cuda.device_count()):
+                    cuda_key = "cuda:" + str(device)
+
                     trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
                     model_time, n_batches = train_cnn_full(model_type, trn_loader, device)
 
-                    key = "cuda:" + str(device)
-                    stats[key] = {}
-                    stats[key][model_type] = {}
-                    stats[key][model_type]["time"] = model_time
-                    stats[key][model_type]["batches"] = n_batches
-                    stats[key][model_type]["images"] = args.b * n_batches
+                    stats[bench_key][cuda_key] = {}
+                    stats[bench_key][cuda_key][model_type] = {}
+                    stats[bench_key][cuda_key][model_type]["time"] = model_time
+                    stats[bench_key][cuda_key][model_type]["batches"] = n_batches
+                    stats[bench_key][cuda_key][model_type]["images"] = args.b * n_batches
 
                     print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
-        print(stats)
 
         print("CIFAR10 benchmark (GPU speed only)")
+        bench_key = "speed"
+        stats[bench_key] = {}
         for model_type in model_list:
             print("[" + model_type + "]")
             for device in range(torch.cuda.device_count()):
+                cuda_key = "cuda:" + str(device)
+
                 trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
                 model_time, n_batches = train_cnn_gpu_only(model_type, trn_loader, device)
 
-                key = "cuda:" + str(device)
-                stats[key][model_type]["time"] = model_time
-                stats[key][model_type]["batches"] = n_batches
-                stats[key][model_type]["images"] = args.b * n_batches
+                stats[bench_key][cuda_key] = {}
+                stats[bench_key][cuda_key][model_type] = {}
+                stats[bench_key][cuda_key][model_type]["time"] = model_time
+                stats[bench_key][cuda_key][model_type]["batches"] = n_batches
+                stats[bench_key][cuda_key][model_type]["images"] = args.b * n_batches
 
                 print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
 
         print("CIFAR10 benchmark (RAM -> GPU data transfer)")
+        bench_key = "transfer"
+        stats[bench_key] = {}
         for model_type in model_list:
             print("[" + model_type + "]")
             for device in range(torch.cuda.device_count()):
+                cuda_key = "cuda:" + str(device)
+                
                 trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
                 model_time, n_batches = train_cnn_ram(model_type, trn_loader, device)
 
-                key = "cuda:" + str(device)
-                stats[key][model_type]["time"] = model_time
-                stats[key][model_type]["batches"] = n_batches
-                stats[key][model_type]["images"] = args.b * n_batches
+                stats[bench_key][cuda_key] = {}
+                stats[bench_key][cuda_key][model_type] = {}
+                stats[bench_key][cuda_key][model_type]["time"] = model_time
+                stats[bench_key][cuda_key][model_type]["batches"] = n_batches
+                stats[bench_key][cuda_key][model_type]["images"] = args.b * n_batches
 
                 print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
