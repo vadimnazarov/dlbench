@@ -90,6 +90,6 @@ if __name__ == "__main__":
             trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
             for device in range(torch.cuda.device_count()):
                 model_time, n_batches = train_cnn(trn_loader, device)
-                print("  cuda:" + str(device), model_time, "sec / 10*batch  (" + str(n_batches) + "batches, " + str(args.batch_size * n_batches) + "images)")
+                print("  cuda:" + str(device), model_time, "sec / 10*batch  (" + str(n_batches) + "batches, " + str(args.b * n_batches) + "images)")
 
 
