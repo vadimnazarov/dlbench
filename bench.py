@@ -37,7 +37,7 @@ def train_dnn(batch_size, n_batches, n_features, device="cpu"):
 
 
 def train_cnn(trn_loader, tst_loader, device="cpu"):
-	model = resnet50()
+	model = resnet18()
 	model.to(device)
 
 	optimizer = optim.Adam(model.parameters())
