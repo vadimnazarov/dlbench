@@ -113,6 +113,7 @@ def train_cnn_ram(trn_loader, tst_loader, device="cuda:0"):
 
 
 if __name__ == "__main__":
+    stats = {"cpu": {}}
     parser = ArgumentParser()
     parser.add_argument("-b", default=256, help="batch size", type=int)
     parser.add_argument("-n", default=100, help="number of batches", type=int)
@@ -149,6 +150,13 @@ if __name__ == "__main__":
             for device in range(torch.cuda.device_count()):
                 trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
                 model_time, n_batches = train_cnn_full(trn_loader, device)
+
+                key = "cuda:" + str(device)
+                stats[key] = {}
+                stats[key]["time"] = model_time
+                stats[key]["batches"] = n_batches
+                stats[key]["images"] = args.b * n_batches
+
                 print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
 
@@ -157,6 +165,12 @@ if __name__ == "__main__":
         for device in range(torch.cuda.device_count()):
             trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
             model_time, n_batches = train_cnn_gpu_only(trn_loader, device)
+
+            key = "cuda:" + str(device)
+            stats[key]["time"] = model_time
+            stats[key]["batches"] = n_batches
+            stats[key]["images"] = args.b * n_batches
+
             print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
 
@@ -165,6 +179,12 @@ if __name__ == "__main__":
         for device in range(torch.cuda.device_count()):
             trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
             model_time, n_batches = train_cnn_ram(trn_loader, device)
+
+            key = "cuda:" + str(device)
+            stats[key]["time"] = model_time
+            stats[key]["batches"] = n_batches
+            stats[key]["images"] = args.b * n_batches
+
             print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
 
