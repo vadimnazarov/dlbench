@@ -10,6 +10,7 @@ import multiprocessing as mp
 
 from utils import *
 from resnet import *
+from resnet import make_model
 
 
 def train_dnn(batch_size, n_batches, n_features, device="cpu"):
