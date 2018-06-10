@@ -204,6 +204,8 @@ if __name__ == "__main__":
                 print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
 
+    print(stats)
+
     with open("log.txt", "w") as outf:
         outf.write(json.dumps(stats, sort_keys=True, indent=4, separators=(',', ': ')))
 
