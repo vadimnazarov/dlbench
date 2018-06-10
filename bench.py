@@ -45,13 +45,13 @@ def train_cnn_full(model_type, trn_loader, tst_loader, device="cuda:0"):
     # if type(device) is int:
     #     device = "cuda:" + str(device)
     print(device)
-    model = make_model(model_type.lower()).to(1)
+    model = make_model(model_type.lower()).to("cuda:1")
 
     optimizer = optim.Adam(model.parameters())
 
     start = time.time()
     for batch_i, (batch, labels) in enumerate(trn_loader):
-        batch, labels = batch.to(1), labels.to(1)
+        batch, labels = batch.to("cuda:1"), labels.to("cuda:1")
         if batch_i == 0:
             print(batch.device)
         preds = model(batch)
