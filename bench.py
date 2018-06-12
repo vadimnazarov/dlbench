@@ -192,7 +192,7 @@ if __name__ == "__main__":
         print()
 
     print(json_normalize(stats))
-    with open("logs.txt", "w") as outf:
+    with open(args.d + "/logs.txt", "w") as outf:
         print(json_normalize(stats), file=outf)
 
 """
