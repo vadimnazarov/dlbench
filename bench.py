@@ -98,9 +98,9 @@ def train_cnn_ram(model_type, trn_loader, device="cuda:0"):
 
     dataset = []
     for batch in trn_loader:
-        dataset.append(batch)
+        dataset.append(batch.cpu())
     for batch in trn_loader:
-        dataset.append(batch)
+        dataset.append(batch.cpu())
 
     start = time.time()
     for batch_i, (batch, labels) in enumerate(dataset):
