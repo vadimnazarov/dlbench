@@ -130,7 +130,7 @@ if __name__ == "__main__":
     parser.add_argument("-b", default=256, help="batch size", type=int)
     parser.add_argument("-n", default=100, help="number of batches", type=int)
     parser.add_argument("-f", default=5000, help="number of features", type=int)
-    parser.add_argument("-d", default="./data/", help="data folder path", type=str)
+    parser.add_argument("-d", default="/artifacts/", help="data folder path", type=str)
     args = parser.parse_args()
 
     print("Deep Learning Benchmark")
@@ -151,19 +151,19 @@ if __name__ == "__main__":
 
         model_list = ["ResNet18", "ResNet152"] 
 
-        # print("CIFAR10 benchmark (full pipeline)")
-        # for model_type in model_list:
-        #     for num_workers in range(0, mp.cpu_count()):
-        #         print("[" + model_type + " #workers ", num_workers, "]", sep="")
-        #         for device in range(torch.cuda.device_count()):
-        #             trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
-        #             model_time, n_batches = train_cnn_full(model_type, trn_loader, device)
+        print("CIFAR10 benchmark (full pipeline)")
+        for model_type in model_list:
+            for num_workers in range(0, mp.cpu_count()):
+                print("[" + model_type + " #workers ", num_workers, "]", sep="")
+                for device in range(torch.cuda.device_count()):
+                    trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
+                    model_time, n_batches = train_cnn_full(model_type, trn_loader, device)
 
-        #             add_item(stats, "full" + str(num_workers), "cuda:" + str(device), 
-        #                      model_type, model_time, n_batches, args.b * n_batches)
+                    add_item(stats, "full" + str(num_workers), "cuda:" + str(device), 
+                             model_type, model_time, n_batches, args.b * n_batches)
 
-        #             print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
-        # print()
+                    print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
+        print()
 
         print("CIFAR10 benchmark (GPU speed only)")
         for model_type in model_list:
@@ -201,5 +201,5 @@ def comp():
     cost_per_hour = float(input("cost per hour: "))
     print("batches per dollar:", round(3600 / (sec_per_batch * cost_per_hour), 3))
 
-    
+
 """
