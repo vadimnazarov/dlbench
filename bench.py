@@ -192,32 +192,14 @@ if __name__ == "__main__":
         print()
 
     print(json_normalize(stats))
+    with open("logs.txt", "w") as outf:
+        print(json_normalize(stats), file=outf)
 
 """
-0.04
-sec / batch
+def comp():
+    sec_per_batch = float(input("sec per batch: "))
+    cost_per_hour = float(input("cost per hour: "))
+    print("batches per dollar:", round(3600 / (sec_per_batch * cost_per_hour), 3))
 
-0.04 / 64
-sec / (batch * 64) = sec / image
-
-1 / (0.04 / 64)
-images / sec
-
-(60 * 60) * 1 / (0.04 / 64)
-images * 60 * 60 / sec = images / hour
-
-(60 * 60) * 1 / (0.04 / 64) / OUR_COST
-images / $
-
-(60 * 60) * 1 / (0.04 / 64) / 1000000 / OUR_COST
-million * images / $
-
-1 / 0.04
-batches / sec
-
-60*60 / 0.04
-batches / hour
-
-60*60 / OUR_COST
-batches / $
+    
 """
