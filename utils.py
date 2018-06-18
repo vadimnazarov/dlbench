@@ -29,9 +29,9 @@ def get_data(url, filename):
         if not os.path.exists(dirname):
             os.makedirs(dirname)
 
-        with TqdmUpTo(unit='B', unit_scale=True, miniters=1, desc=url.split('/')[-1]) as t:
-            urlretrieve(url, filename, reporthook=t.update_to)
-        # urlretrieve(url, filename)
+        # with TqdmUpTo(unit='B', unit_scale=True, miniters=1, desc=url.split('/')[-1]) as t:
+        #     urlretrieve(url, filename, reporthook=t.update_to)
+        urlretrieve(url, filename)
 
 
 def download_cifar10(data_path):
@@ -48,10 +48,12 @@ def download_cifar10(data_path):
     untar_time = -1
     if not os.path.exists(data_path+'/train'):
         if not os.path.exists(data_path+'/cifar10.tgz'):
+            print("Downloading CIFAR10...")
             start_time = time.time()
             get_data(cifar_url, data_path+'/cifar10.tgz')
             download_time = time.time() - start_time
 
+        print("Extracting CIFAR10...")
         start_time = time.time()
         untar_file(data_path+'/cifar10.tgz', data_path)
         untar_time = time.time() - start_time
