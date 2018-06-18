@@ -135,10 +135,10 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--cuda", default="all", help="which cuda devices use (example - '0,1,3', default - 'all')", type=str)
     args = parser.parse_args()
 
-    if args.c == "all":
+    if args.cuda == "all":
         cuda_devices = list(range(torch.cuda.device_count()))
     else:
-        cuda_devices = list(map(lambda x: int(x.strip()), args.c.split(",")))
+        cuda_devices = list(map(lambda x: int(x.strip()), args.cuda.split(",")))
 
     print("Deep Learning Benchmark")
     print("  CUDA:  ", torch.cuda.is_available())
