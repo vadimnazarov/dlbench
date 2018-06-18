@@ -132,12 +132,19 @@ if __name__ == "__main__":
     parser.add_argument("-f", default=5000, help="number of features", type=int)
     parser.add_argument("-d", default="./data", help="data folder path", type=str)
     parser.add_argument("-o", default="./", help="output folder path", type=str)
+    parser.add_argument("-c", "--cuda", default="all", help="which cuda devices use (example - '0,1,3', default - 'all')", type=str)
     args = parser.parse_args()
+
+    if args.c == "all":
+        cuda_devices = list(range(torch.cuda.device_count()))
+    else:
+        cuda_devices = list(map(lambda x: int(x.strip()), args.c.split(",")))
 
     print("Deep Learning Benchmark")
     print("  CUDA:  ", torch.cuda.is_available())
     print("  CUDNN: ", torch.backends.cudnn.enabled)
     print("  #GPUs: ", torch.cuda.device_count())
+    print("  GPUs selected: ", cuda_devices)
     print()
 
     print("CIFAR10 dataset")
