@@ -45,13 +45,13 @@ def download_cifar10(data_path):
     cifar_url = 'http://files.fast.ai/data/cifar10.tgz'
 
     download_time = -1
+    untar_time = -1
     if not os.path.exists(data_path+'/train'):
         if not os.path.exists(data_path+'/cifar10.tgz'):
             start_time = time.time()
             get_data(cifar_url, data_path+'/cifar10.tgz')
             download_time = time.time() - start_time
 
-        untar_time = -1
         start_time = time.time()
         untar_file(data_path+'/cifar10.tgz', data_path)
         untar_time = time.time() - start_time
