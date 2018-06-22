@@ -15,32 +15,6 @@ from utils import *
 from resnet import make_model
 
 
-def train_dnn(batch_size, n_batches, n_features, device="cpu"):
-    layers = []
-    layers.append(nn.Linear(n_features, 64))
-    layers.append(nn.Linear(64, 64))
-    layers.append(nn.Linear(64, 64))
-    layers.append(nn.Linear(64, 1))
-    model = nn.Sequential(*layers)
-    model.to(device)
-
-    optimizer = optim.Adam(model.parameters())
-
-    batch_x = torch.FloatTensor([_ for _ in range(n_features * batch_size)]).random_(-1, 1).reshape((batch_size, n_features)).to(device)
-    batch_y = torch.normal(torch.FloatTensor([_ for _ in range(batch_size)])).to(device)
-
-    start = time.time()
-    for i in range(n_batches):
-        pred = model(batch_x)
-        loss = F.mse_loss(batch_y, pred)
-        loss.backward()
-        optimizer.step()
-    end = time.time()
-
-    batch_i += 1
-    return round((end - start) / (n_batches / 10), 3)
-
-
 def train_cnn_full(model_type, trn_loader, device="cuda:0"):
     assert device != "cpu"
     if type(device) is int:
@@ -62,7 +36,33 @@ def train_cnn_full(model_type, trn_loader, device="cuda:0"):
     return round((end - start) / batch_i, 3), batch_i
 
 
-def train_cnn_gpu_only(model_type, trn_loader, device="cuda:0"):
+def train_neural_style(device="cuda:0"):
+    assert device != "cpu"
+    if type(device) is int:
+        device = "cuda:" + str(device)
+    model = make_model(model_type.lower()).to(device)
+
+    optimizer = optim.Adam(model.parameters())
+
+    dataset = []
+    for batch, labels in trn_loader:
+        dataset.append((batch.to(device), labels.to(device)))
+    for batch, labels in trn_loader:
+        dataset.append((batch.to(device), labels.to(device)))
+
+    start = time.time()
+    for batch_i, (batch, labels) in enumerate(dataset):
+        preds = model(batch)
+        loss = F.cross_entropy(preds, labels)
+        loss.backward()
+        optimizer.step()
+    end = time.time()
+
+    batch_i += 1
+    return round((end - start) / batch_i, 3), batch_i
+
+
+def train_sentiment(trn_loader, device="cuda:0"):
     assert device != "cpu"
     if type(device) is int:
         device = "cuda:" + str(device)
@@ -157,20 +157,31 @@ if __name__ == "__main__":
     if torch.cuda.device_count() and torch.backends.cudnn.enabled:
         torch.backends.cudnn.benchmark = True
 
+        # print("Neural style benchmark (GPU + CPU)")
+        # for device in cuda_devices:
+        #     model_time, n_batches = train_neural_style(device)
+
+        #     add_item(stats, "style", "cuda:" + str(device), 
+        #              "VGG", model_time, n_batches, 2 * n_batches)
+
+        #     print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(2 * n_batches) + " images)")
+        # print()
+
+        # print("Sentiment analysis benchmark (GPU speed)")
+        # for device in cuda_devices:
+        #     model_time, n_batches = train_sentiment(device)
+
+        #     add_item(stats, "sentiment", "cuda:" + str(device), 
+        #              "GRU", model_time, n_batches, 2 * n_batches)
+
+        #     print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(2 * n_batches) + " images)")
+        # print()
+
+        #
+        # print("DCGAN benchmark (full pipeline)")
+        #
+
         model_list = ["ResNet18", "ResNet152"] 
-
-        print("CIFAR10 benchmark (GPU speed only)")
-        for model_type in model_list:
-            print("[" + model_type + "]")
-            for device in cuda_devices:
-                trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
-                model_time, n_batches = train_cnn_gpu_only(model_type, trn_loader, device)
-
-                add_item(stats, "speed", "cuda:" + str(device), 
-                         model_type, model_time, n_batches, args.b * n_batches)
-
-                print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
-        print()
 
         print("CIFAR10 benchmark (RAM -> GPU data transfer)")
         for model_type in model_list:
@@ -179,7 +190,7 @@ if __name__ == "__main__":
                 trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
                 model_time, n_batches = train_cnn_ram(model_type, trn_loader, device)
 
-                add_item(stats, "transfer", "cuda:" + str(device), 
+                add_item(stats, "ram_gpu", "cuda:" + str(device), 
                          model_type, model_time, n_batches, args.b * n_batches)
 
                 print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
@@ -193,14 +204,14 @@ if __name__ == "__main__":
                     trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
                     model_time, n_batches = train_cnn_full(model_type, trn_loader, device)
 
-                    add_item(stats, "full" + str(num_workers), "cuda:" + str(device), 
+                    add_item(stats, "cifar10" + str(num_workers), "cuda:" + str(device), 
                              model_type, model_time, n_batches, args.b * n_batches)
 
                     print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
 
     df = json_normalize(stats)
-    df.sort_values(by="device", inplace=True)
+    df.sort_values(by=["device", "model", "benchmark"], inplace=True)
     print(df)
     df.to_csv(args.o + "/logs.txt")
 
