@@ -204,7 +204,7 @@ if __name__ == "__main__":
                     trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
                     model_time, n_batches = train_cnn_full(model_type, trn_loader, device)
 
-                    add_item(stats, "cifar" + str(num_workers), "cuda:" + str(device), 
+                    add_item(stats, "cifar" + str(num_workers).zfill(2), "cuda:" + str(device), 
                              model_type, model_time, n_batches, args.b * n_batches)
 
                     print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
