@@ -100,4 +100,48 @@ num_workers=args.workers, pin_memory=True, sampler=train_sampler)
     return trainloader
 
 
+# def make_imdb_dataset(data_path, batch_size, num_workers=0):
+#     transform_train = transforms.Compose([
+#         transforms.RandomCrop(32, padding=4),
+#         transforms.ColorJitter(.25,.25,.25),
+#         transforms.RandomRotation(2),
+#         transforms.RandomHorizontalFlip(),
+#         transforms.ToTensor(),
+#         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+#     ])
+
+#     transform_test = transforms.Compose([
+#         transforms.ToTensor(),
+#         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+#     ])
+
+#     train_folder = os.path.join(data_path, 'train')
+#     train_data = torchvision.datasets.ImageFolder(train_folder, transform_train)
+#     trainloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=num_workers)
+
+#     return trainloader
+
+
+# def make_cifar10_dataset_dcgan(data_path, batch_size, distributed=False, num_workers=0):
+#     transform_train = transforms.Compose([
+#         transforms.RandomCrop(32, padding=4),
+#         transforms.ColorJitter(.25,.25,.25),
+#         transforms.RandomRotation(2),
+#         transforms.RandomHorizontalFlip(),
+#         transforms.ToTensor(),
+#         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+#     ])
+
+#     transform_test = transforms.Compose([
+#         transforms.ToTensor(),
+#         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+#     ])
+
+#     train_folder = os.path.join(data_path, 'train')
+#     train_data = torchvision.datasets.ImageFolder(train_folder, transform_train)
+#     trainloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=num_workers)
+
+#     return trainloader
+
+
 
