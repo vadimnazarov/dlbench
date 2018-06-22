@@ -157,7 +157,7 @@ if __name__ == "__main__":
     if torch.cuda.device_count() and torch.backends.cudnn.enabled:
         torch.backends.cudnn.benchmark = True
 
-        # print("Neural style benchmark (GPU + CPU)")
+        # print("Neural style benchmark (GPU mostly)")
         # for device in cuda_devices:
         #     model_time, n_batches = train_neural_style(device)
 
@@ -167,7 +167,7 @@ if __name__ == "__main__":
         #     print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(2 * n_batches) + " images)")
         # print()
 
-        # print("Sentiment analysis benchmark (GPU speed)")
+        # print("Sentiment analysis benchmark (full)")
         # for device in cuda_devices:
         #     model_time, n_batches = train_sentiment(device)
 
@@ -178,12 +178,12 @@ if __name__ == "__main__":
         # print()
 
         #
-        # print("DCGAN benchmark (full pipeline)")
+        # print("DCGAN benchmark (full+disk)")
         #
 
         model_list = ["ResNet18", "ResNet152"] 
 
-        print("CIFAR10 benchmark (RAM -> GPU data transfer)")
+        print("CIFAR10 benchmark (RAM->GPU data transfer)")
         for model_type in model_list:
             print("[" + model_type + "]")
             for device in cuda_devices:
@@ -196,7 +196,7 @@ if __name__ == "__main__":
                 print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
 
-        print("CIFAR10 benchmark (full pipeline)")
+        print("CIFAR10 benchmark (full+disk)")
         for model_type in model_list:
             for num_workers in range(0, mp.cpu_count()):
                 print("[" + model_type + " #workers ", num_workers, "]", sep="")
@@ -204,14 +204,14 @@ if __name__ == "__main__":
                     trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
                     model_time, n_batches = train_cnn_full(model_type, trn_loader, device)
 
-                    add_item(stats, "cifar10" + str(num_workers), "cuda:" + str(device), 
+                    add_item(stats, "cifar" + str(num_workers), "cuda:" + str(device), 
                              model_type, model_time, n_batches, args.b * n_batches)
 
                     print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
 
     df = json_normalize(stats)
-    df.sort_values(by=["device", "model", "benchmark"], inplace=True)
+    df.sort_values(by=["benchmark", "model", "device"], inplace=True)
     print(df)
     df.to_csv(args.o + "/logs.txt")
 
