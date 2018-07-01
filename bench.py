@@ -129,6 +129,7 @@ def add_item(stats, bench, cuda, model, time, batches, images):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-b", default=256, help="batch size", type=int)
+    parser.add_argument("--br", default=64, help="batch size for RNN", type=int)
     parser.add_argument("-n", default=100, help="number of batches", type=int)
     parser.add_argument("-f", default=5000, help="number of features", type=int)
     parser.add_argument("-d", default="./data", help="data folder path", type=str)
@@ -154,6 +155,8 @@ if __name__ == "__main__":
     print("  untar time:", round(untar_time, 3))
     print()
 
+    sentiment_data, alphabet_size = make_imdb_dataset(args.d)
+
     stats = []
     max_cpu_count = min(mp.cpu_count()+1, 8)
     if torch.cuda.device_count() and torch.backends.cudnn.enabled:
@@ -170,19 +173,17 @@ if __name__ == "__main__":
         # print()
 
         print("Sentiment analysis benchmark (full)")
-        trn_data, alphabet_size = make_imdb_dataset(args.d)
-        
         for num_workers in range(0, max_cpu_count):
             print("[GRU #workers ", num_workers, "]", sep="")
 
             for device in cuda_devices:
-                trn_loader = make_imdb_dataloader(trn_data, args.b, device, num_workers=num_workers)
+                trn_loader = make_imdb_dataloader(sentiment_data, args.br, device, num_workers=num_workers)
                 model_time, n_batches = train_sentiment(trn_loader, alphabet_size, device)
 
                 add_item(stats, "sentim" + str(num_workers).zfill(2), "cuda:" + str(device), 
-                         "GRU", model_time, n_batches, args.b * n_batches)
+                         "GRU", model_time, n_batches, args.br * n_batches)
 
-                print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " reviews)")
+                print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.br * n_batches) + " reviews)")
         print()
 
         #
@@ -192,6 +193,7 @@ if __name__ == "__main__":
         model_list = ["ResNet18", "ResNet152"] 
 
         print("CIFAR10 benchmark (RAM->GPU data transfer)")
+
         for model_type in model_list:
             print("[" + model_type + "]")
             for device in cuda_devices:

@@ -110,9 +110,9 @@ class SentimentRNN(nn.Module):
 
     def __init__(self, alphabet_size):
         super(SentimentRNN, self).__init__()
-        hidden = 32
-        n_layers = 1
-        self.rnn = nn.GRU(alphabet_size, hidden, n_layers, batch_first=True)
+        hidden = 64
+        self.n_layers = 2
+        self.rnn = nn.GRU(alphabet_size, hidden, self.n_layers, batch_first=True)
         self.final = nn.Sequential(nn.BatchNorm1d(hidden), 
                                    nn.RReLU(), 
                                    nn.Linear(hidden, 1), 
