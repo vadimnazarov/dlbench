@@ -120,6 +120,7 @@ class SentimentRNN(nn.Module):
 
     def forward(self, input):
         _, x = self.rnn(input)
+        x = x[-1]
         return self.final(x.squeeze(0)).squeeze(1)
 
 
