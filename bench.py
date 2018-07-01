@@ -41,7 +41,7 @@ def train_neural_style(device="cuda:0"):
     assert device != "cpu"
     if type(device) is int:
         device = "cuda:" + str(device)
-        
+
     model = make_model(model_type.lower()).to(device)
 
     optimizer = optim.Adam(model.parameters())
@@ -76,7 +76,7 @@ def train_sentiment(trn_loader, alphabet_size, device="cuda:0"):
     start = time.time()
     for batch_i, (batch, lens, labels) in enumerate(trn_loader):
         s_values, indices = torch.sort(lens, descending=True)
-        batch = torch.nn.utils.rnn.pack_padded_sequence(batch[indices], s_values, batch_first=True).to(device)
+        batch = torch.nn.utils.rnn.pack_padded_sequence(batch[indices].to(device), s_values, batch_first=True)
         preds = model(batch)
         loss = F.binary_cross_entropy(preds, labels[indices])
         loss.backward()
