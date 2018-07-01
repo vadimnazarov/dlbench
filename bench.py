@@ -173,9 +173,9 @@ if __name__ == "__main__":
             print("[GRU #workers ", num_workers, "]", sep="")
 
             trn_data, alphabet_size = make_imdb_dataset(args.d)
-            trn_loader = make_imdb_dataloader(trn_data, args.b, device, num_workers=num_workers)
 
             for device in cuda_devices:
+                trn_loader = make_imdb_dataloader(trn_data, args.b, device, num_workers=num_workers)
                 model_time, n_batches = train_sentiment(trn_loader, alphabet_size, device)
 
                 add_item(stats, "sentim" + str(num_workers).zfill(2), "cuda:" + str(device), 
