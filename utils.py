@@ -170,7 +170,7 @@ def make_imdb_dataset(data_path):
     return train_data, len(alphabet)
 
 
-def make_imdb_dataloader(train_data, batch_size, num_workers=n0):
+def make_imdb_dataloader(train_data, batch_size, num_workers=0):
     return torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=num_workers)
 
 
