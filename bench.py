@@ -169,7 +169,7 @@ if __name__ == "__main__":
         for num_workers in range(0, mp.cpu_count()):
             print("[GRU #workers ", num_workers, "]", sep="")
 
-            trn_data, alphabet_size = make_imdb_dataset(args.d, args.b)
+            trn_data, alphabet_size = make_imdb_dataset(args.d)
             trn_loader = make_imdb_dataloader(trn_data, args.b, num_workers=num_workers)
 
             for device in cuda_devices:
