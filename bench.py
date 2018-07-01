@@ -4,6 +4,7 @@ import json
 from argparse import ArgumentParser
 import multiprocessing as mp
 
+import numpy as np
 from pandas.io.json import json_normalize
 
 import torch
@@ -62,24 +63,21 @@ def train_neural_style(device="cuda:0"):
     return round((end - start) / batch_i, 3), batch_i
 
 
-def train_sentiment(trn_loader, device="cuda:0"):
-    assert device != "cpu"
-    if type(device) is int:
-        device = "cuda:" + str(device)
-    model = make_model(model_type.lower()).to(device)
+def train_sentiment(trn_loader, alphabet_size, device="cuda:0"):
+    # assert device != "cpu"
+    # if type(device) is int:
+    #     device = "cuda:" + str(device)
 
-    optimizer = optim.Adam(model.parameters())
+    model = SentimentRNN(alphabet_size).to(device)
 
-    dataset = []
-    for batch, labels in trn_loader:
-        dataset.append((batch.to(device), labels.to(device)))
-    for batch, labels in trn_loader:
-        dataset.append((batch.to(device), labels.to(device)))
+    optimizer = optim.RMSprop(model.parameters())
 
     start = time.time()
-    for batch_i, (batch, labels) in enumerate(dataset):
+    for batch_i, (batch, lens, labels) in enumerate(trn_loader):
+        s_values, indices = torch.sort(lens, descending=True)
+        batch = torch.nn.utils.rnn.pack_padded_sequence(batch[indices], s_values, batch_first=True)
         preds = model(batch)
-        loss = F.cross_entropy(preds, labels)
+        loss = F.binary_cross_entropy(preds, labels[indices])
         loss.backward()
         optimizer.step()
     end = time.time()
@@ -122,7 +120,7 @@ def add_item(stats, bench, cuda, model, time, batches, images):
     stats[-1]["model"] = model
     stats[-1]["time"] = time
     stats[-1]["batches"] = batches
-    stats[-1]["images"] = images
+    stats[-1]["objects"] = images
 
 
 if __name__ == "__main__":
@@ -167,15 +165,21 @@ if __name__ == "__main__":
         #     print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(2 * n_batches) + " images)")
         # print()
 
-        # print("Sentiment analysis benchmark (full)")
-        # for device in cuda_devices:
-        #     model_time, n_batches = train_sentiment(device)
+        print("Sentiment analysis benchmark (full)")
+        for num_workers in range(0, mp.cpu_count()):
+            print("[GRU #workers ", num_workers, "]", sep="")
 
-        #     add_item(stats, "sentiment", "cuda:" + str(device), 
-        #              "GRU", model_time, n_batches, 2 * n_batches)
+            trn_data, alphabet_size = make_imdb_dataset(args.d, args.b)
+            trn_loader = make_imdb_dataloader(trn_data, args.b, num_workers=num_workers)
 
-        #     print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(2 * n_batches) + " images)")
-        # print()
+            for device in cuda_devices:
+                model_time, n_batches = train_sentiment(trn_loader, alphabet_size, device)
+
+                add_item(stats, "sentim" + str(num_workers).zfill(2), "cuda:" + str(device), 
+                         "GRU", model_time, n_batches, args.b * n_batches)
+
+                print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " reviews)")
+        print()
 
         #
         # print("DCGAN benchmark (full+disk)")
