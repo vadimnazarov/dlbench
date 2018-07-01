@@ -129,7 +129,7 @@ def add_item(stats, bench, cuda, model, time, batches, images):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-b", default=256, help="batch size", type=int)
-    parser.add_argument("--br", default=64, help="batch size for RNN", type=int)
+    parser.add_argument("--br", default=128, help="batch size for RNN", type=int)
     parser.add_argument("-n", default=100, help="number of batches", type=int)
     parser.add_argument("-f", default=5000, help="number of features", type=int)
     parser.add_argument("-d", default="./data", help="data folder path", type=str)
@@ -156,9 +156,10 @@ if __name__ == "__main__":
     print()
 
     sentiment_data, alphabet_size = make_imdb_dataset(args.d)
+    print()
 
     stats = []
-    max_cpu_count = min(mp.cpu_count()+1, 8)
+    max_cpu_count = min(mp.cpu_count(), 8) + 1
     if torch.cuda.device_count() and torch.backends.cudnn.enabled:
         torch.backends.cudnn.benchmark = True
 
@@ -173,7 +174,7 @@ if __name__ == "__main__":
         # print()
 
         print("Sentiment analysis benchmark (full)")
-        for num_workers in range(0, max_cpu_count):
+        for num_workers in range(0, 3):
             print("[GRU #workers ", num_workers, "]", sep="")
 
             for device in cuda_devices:
@@ -185,6 +186,9 @@ if __name__ == "__main__":
 
                 print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.br * n_batches) + " reviews)")
         print()
+
+        del trn_loader
+        del sentiment_data
 
         #
         # print("DCGAN benchmark (full+disk)")
