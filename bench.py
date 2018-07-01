@@ -75,6 +75,7 @@ def train_sentiment(trn_loader, alphabet_size, device="cuda:0"):
 
     start = time.time()
     for batch_i, (batch, lens, labels) in enumerate(trn_loader):
+        batch, labels = batch.to(device), labels.to(device)
         s_values, indices = torch.sort(lens, descending=True)
         batch = torch.nn.utils.rnn.pack_padded_sequence(batch[indices], s_values, batch_first=True)
         preds = model(batch)

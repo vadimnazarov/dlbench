@@ -174,7 +174,6 @@ def make_imdb_dataset(data_path):
 
 def make_imdb_dataloader(train_data, batch_size, device, num_workers=0):
     torch.cuda.device(device)
-    # train_data.to(device)
     return torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True, pin_memory=True, num_workers=num_workers)
 
 
