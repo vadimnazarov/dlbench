@@ -76,7 +76,7 @@ def train_sentiment(trn_loader, alphabet_size, device="cuda:0"):
     start = time.time()
     for batch_i, (batch, lens, labels) in enumerate(trn_loader):
         s_values, indices = torch.sort(lens, descending=True)
-        batch = torch.nn.utils.rnn.pack_padded_sequence(batch[indices].to(device), s_values, batch_first=True)
+        batch = torch.nn.utils.rnn.pack_padded_sequence(batch[indices], s_values, batch_first=True)
         preds = model(batch)
         loss = F.binary_cross_entropy(preds, labels[indices])
         loss.backward()
@@ -154,6 +154,7 @@ if __name__ == "__main__":
     print()
 
     stats = []
+    max_cpu_count = min(mp.cpu_count()+1, 8)
     if torch.cuda.device_count() and torch.backends.cudnn.enabled:
         torch.backends.cudnn.benchmark = True
 
@@ -168,11 +169,11 @@ if __name__ == "__main__":
         # print()
 
         print("Sentiment analysis benchmark (full)")
-        for num_workers in range(0, mp.cpu_count()):
+        for num_workers in range(0, max_cpu_count):
             print("[GRU #workers ", num_workers, "]", sep="")
 
             trn_data, alphabet_size = make_imdb_dataset(args.d)
-            trn_loader = make_imdb_dataloader(trn_data, args.b, num_workers=num_workers)
+            trn_loader = make_imdb_dataloader(trn_data, args.b, device, num_workers=num_workers)
 
             for device in cuda_devices:
                 model_time, n_batches = train_sentiment(trn_loader, alphabet_size, device)
@@ -193,7 +194,7 @@ if __name__ == "__main__":
         for model_type in model_list:
             print("[" + model_type + "]")
             for device in cuda_devices:
-                trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=0)
+                trn_loader = make_cifar10_dataset(args.d, args.b, device=device, distributed=False, num_workers=0)
                 model_time, n_batches = train_cnn_ram(model_type, trn_loader, device)
 
                 add_item(stats, "ram_gpu", "cuda:" + str(device), 
@@ -204,10 +205,10 @@ if __name__ == "__main__":
 
         print("CIFAR10 benchmark (full+disk)")
         for model_type in model_list:
-            for num_workers in range(0, mp.cpu_count()):
+            for num_workers in range(0, max_cpu_count):
                 print("[" + model_type + " #workers ", num_workers, "]", sep="")
                 for device in cuda_devices:
-                    trn_loader = make_cifar10_dataset(args.d, args.b, distributed=False, num_workers=num_workers)
+                    trn_loader = make_cifar10_dataset(args.d, args.b, device=device, distributed=False, num_workers=num_workers)
                     model_time, n_batches = train_cnn_full(model_type, trn_loader, device)
 
                     add_item(stats, "cifar" + str(num_workers).zfill(2), "cuda:" + str(device), 
