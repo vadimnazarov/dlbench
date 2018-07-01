@@ -170,10 +170,10 @@ if __name__ == "__main__":
         # print()
 
         print("Sentiment analysis benchmark (full)")
+        trn_data, alphabet_size = make_imdb_dataset(args.d)
+        
         for num_workers in range(0, max_cpu_count):
             print("[GRU #workers ", num_workers, "]", sep="")
-
-            trn_data, alphabet_size = make_imdb_dataset(args.d)
 
             for device in cuda_devices:
                 trn_loader = make_imdb_dataloader(trn_data, args.b, device, num_workers=num_workers)
