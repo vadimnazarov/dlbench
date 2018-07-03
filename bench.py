@@ -16,27 +16,6 @@ from utils import *
 from resnet import make_model
 
 
-def train_cnn_full(model_type, trn_loader, device="cuda:0"):
-    assert device != "cpu"
-    if type(device) is int:
-        device = "cuda:" + str(device)
-    model = make_model(model_type.lower()).to(device)
-
-    optimizer = optim.Adam(model.parameters())
-
-    start = time.time()
-    for batch_i, (batch, labels) in enumerate(trn_loader):
-        batch, labels = batch.to(device), labels.to(device)
-        preds = model(batch)
-        loss = F.cross_entropy(preds, labels)
-        loss.backward()
-        optimizer.step()
-    end = time.time()
-
-    batch_i += 1
-    return round((end - start) / batch_i, 3), batch_i
-
-
 def train_neural_style(device="cuda:0"):
     assert device != "cpu"
     if type(device) is int:
@@ -64,6 +43,33 @@ def train_neural_style(device="cuda:0"):
     return round((end - start) / batch_i, 3), batch_i
 
 
+# def train_dcgan(device="cuda:0"):
+#     assert device != "cpu"
+#     if type(device) is int:
+#         device = "cuda:" + str(device)
+
+#     model = make_model(model_type.lower()).to(device)
+
+#     optimizer = optim.Adam(model.parameters())
+
+#     dataset = []
+#     for batch, labels in trn_loader:
+#         dataset.append((batch.to(device), labels.to(device)))
+#     for batch, labels in trn_loader:
+#         dataset.append((batch.to(device), labels.to(device)))
+
+#     start = time.time()
+#     for batch_i, (batch, labels) in enumerate(dataset):
+#         preds = model(batch)
+#         loss = F.cross_entropy(preds, labels)
+#         loss.backward()
+#         optimizer.step()
+#     end = time.time()
+
+#     batch_i += 1
+#     return round((end - start) / batch_i, 3), batch_i
+
+
 def train_sentiment(trn_loader, alphabet_size, device="cuda:0"):
     assert device != "cpu"
     if type(device) is int:
@@ -80,6 +86,27 @@ def train_sentiment(trn_loader, alphabet_size, device="cuda:0"):
         batch = torch.nn.utils.rnn.pack_padded_sequence(batch[indices], s_values, batch_first=True)
         preds = model(batch)
         loss = F.binary_cross_entropy(preds, labels[indices])
+        loss.backward()
+        optimizer.step()
+    end = time.time()
+
+    batch_i += 1
+    return round((end - start) / batch_i, 3), batch_i
+
+
+def train_cnn_full(model_type, trn_loader, device="cuda:0"):
+    assert device != "cpu"
+    if type(device) is int:
+        device = "cuda:" + str(device)
+    model = make_model(model_type.lower()).to(device)
+
+    optimizer = optim.Adam(model.parameters())
+
+    start = time.time()
+    for batch_i, (batch, labels) in enumerate(trn_loader):
+        batch, labels = batch.to(device), labels.to(device)
+        preds = model(batch)
+        loss = F.cross_entropy(preds, labels)
         loss.backward()
         optimizer.step()
     end = time.time()
@@ -174,7 +201,7 @@ if __name__ == "__main__":
         # print()
 
         print("Sentiment analysis benchmark (full)")
-        for num_workers in range(0, 3):
+        for num_workers in range(0, 5):
             print("[GRU #workers ", num_workers, "]", sep="")
 
             for device in cuda_devices:
@@ -187,8 +214,8 @@ if __name__ == "__main__":
                 print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.br * n_batches) + " reviews)")
         print()
 
-        del trn_loader
-        del sentiment_data
+        trn_loader = None
+        sentiment_data = None
 
         #
         # print("DCGAN benchmark (full+disk)")
@@ -225,7 +252,7 @@ if __name__ == "__main__":
         print()
 
     df = json_normalize(stats)
-    df.sort_values(by=["benchmark", "model", "device"], inplace=True)
+    df.sort_values(by=["benchmark", "device", "model"], inplace=True)
     print(df)
     df.to_csv(args.o + "/logs.txt")
 
