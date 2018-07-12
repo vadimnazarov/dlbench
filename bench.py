@@ -183,7 +183,7 @@ if __name__ == "__main__":
     print("  untar time:", round(untar_time, 3))
     print()
 
-    sentiment_data, alphabet_size = make_imdb_dataset(args.d)
+    # sentiment_data, alphabet_size = make_imdb_dataset(args.d)
     print()
 
     stats = []
@@ -202,19 +202,19 @@ if __name__ == "__main__":
         #     print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(2 * n_batches) + " images)")
         # print()
 
-        print("Sentiment analysis benchmark (full)")
-        for num_workers in range(0, 5):
-            print("[GRU #workers ", num_workers, "]", sep="")
+        # print("Sentiment analysis benchmark (full)")
+        # for num_workers in range(0, 5):
+        #     print("[GRU #workers ", num_workers, "]", sep="")
 
-            for device in cuda_devices:
-                trn_loader = make_imdb_dataloader(sentiment_data, args.br, device, num_workers=num_workers)
-                model_time, n_batches = train_sentiment(trn_loader, alphabet_size, device)
+        #     for device in cuda_devices:
+        #         trn_loader = make_imdb_dataloader(sentiment_data, args.br, device, num_workers=num_workers)
+        #         model_time, n_batches = train_sentiment(trn_loader, alphabet_size, device)
 
-                add_item(stats, "sentim" + str(num_workers).zfill(2), "cuda:" + str(device), 
-                         "GRU", model_time, n_batches, args.br * n_batches)
+        #         add_item(stats, "sentim" + str(num_workers).zfill(2), "cuda:" + str(device), 
+        #                  "GRU", model_time, n_batches, args.br * n_batches)
 
-                print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.br * n_batches) + " reviews)")
-        print()
+        #         print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.br * n_batches) + " reviews)")
+        # print()
 
         trn_loader = None
         sentiment_data = None
