@@ -162,6 +162,7 @@ if __name__ == "__main__":
     parser.add_argument("-d", default="./data", help="data folder path", type=str)
     parser.add_argument("-o", default="./", help="output folder path", type=str)
     parser.add_argument("-c", "--cuda", default="all", help="which cuda devices use (example - '0,1,3', default - 'all')", type=str)
+    parser.add_argument("--mc", "--max_cpu", default=8, help="max number of CPU cores to use", type=int)
     args = parser.parse_args()
 
     if args.cuda == "all":
@@ -186,7 +187,8 @@ if __name__ == "__main__":
     print()
 
     stats = []
-    max_cpu_count = min(mp.cpu_count(), 8) + 1
+    # max_cpu_count = min(mp.cpu_count(), 8) + 1
+    max_cpu_count = min(mp.cpu_count(), args.max_cpu) + 1
     if torch.cuda.device_count() and torch.backends.cudnn.enabled:
         torch.backends.cudnn.benchmark = True
 
