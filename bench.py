@@ -188,7 +188,7 @@ if __name__ == "__main__":
 
     stats = []
     # max_cpu_count = min(mp.cpu_count(), 8) + 1
-    max_cpu_count = min(mp.cpu_count(), args.max_cpu) + 1
+    max_cpu_count = min(mp.cpu_count(), args.mc) + 1
     if torch.cuda.device_count() and torch.backends.cudnn.enabled:
         torch.backends.cudnn.benchmark = True
 
