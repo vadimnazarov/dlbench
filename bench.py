@@ -8,139 +8,12 @@ import numpy as np
 from pandas.io.json import json_normalize
 
 import torch
-import torch.nn.functional as F
-from torch import nn
-from torch import optim
-
-from utils import *
-from resnet import make_model
-
-
-def train_neural_style(device="cuda:0"):
-    assert device != "cpu"
-    if type(device) is int:
-        device = "cuda:" + str(device)
-
-    model = make_model(model_type.lower()).to(device)
-
-    optimizer = optim.Adam(model.parameters())
-
-    dataset = []
-    for batch, labels in trn_loader:
-        dataset.append((batch.to(device), labels.to(device)))
-    for batch, labels in trn_loader:
-        dataset.append((batch.to(device), labels.to(device)))
-
-    start = time.time()
-    for batch_i, (batch, labels) in enumerate(dataset):
-        preds = model(batch)
-        loss = F.cross_entropy(preds, labels)
-        loss.backward()
-        optimizer.step()
-    end = time.time()
-
-    batch_i += 1
-    return round((end - start) / batch_i, 3), batch_i
-
-
-# def train_dcgan(device="cuda:0"):
-#     assert device != "cpu"
-#     if type(device) is int:
-#         device = "cuda:" + str(device)
-
-#     model = make_model(model_type.lower()).to(device)
-
-#     optimizer = optim.Adam(model.parameters())
-
-#     dataset = []
-#     for batch, labels in trn_loader:
-#         dataset.append((batch.to(device), labels.to(device)))
-#     for batch, labels in trn_loader:
-#         dataset.append((batch.to(device), labels.to(device)))
-
-#     start = time.time()
-#     for batch_i, (batch, labels) in enumerate(dataset):
-#         preds = model(batch)
-#         loss = F.cross_entropy(preds, labels)
-#         loss.backward()
-#         optimizer.step()
-#     end = time.time()
-
-#     batch_i += 1
-#     return round((end - start) / batch_i, 3), batch_i
-
-
-def train_sentiment(trn_loader, alphabet_size, device="cuda:0"):
-    assert device != "cpu"
-    if type(device) is int:
-        device = "cuda:" + str(device)
-
-    model = SentimentRNN(alphabet_size).to(device)
-
-    optimizer = optim.RMSprop(model.parameters())
-
-    start = time.time()
-    for batch_i, (batch, lens, labels) in enumerate(trn_loader):
-        batch, labels = batch.to(device), labels.to(device)
-        s_values, indices = torch.sort(lens, descending=True)
-        batch = torch.nn.utils.rnn.pack_padded_sequence(batch[indices], s_values, batch_first=True)
-        preds = model(batch)
-        loss = F.binary_cross_entropy(preds, labels[indices])
-        loss.backward()
-        optimizer.step()
-    end = time.time()
-
-    batch_i += 1
-    return round((end - start) / batch_i, 3), batch_i
-
-
-def train_cnn_full(model_type, trn_loader, device="cuda:0"):
-    assert device != "cpu"
-    if type(device) is int:
-        device = "cuda:" + str(device)
-    model = make_model(model_type.lower()).to(device)
-
-    optimizer = optim.Adam(model.parameters())
-
-    start = time.time()
-    for batch_i, (batch, labels) in enumerate(trn_loader):
-        batch, labels = batch.to(device), labels.to(device)
-        preds = model(batch)
-        loss = F.cross_entropy(preds, labels)
-        loss.backward()
-        optimizer.step()
-    end = time.time()
-
-    batch_i += 1
-    return round((end - start) / batch_i, 3), batch_i
-
-
-def train_cnn_ram(model_type, trn_loader, device="cuda:0"):
-    assert device != "cpu"
-    if type(device) is int:
-        device = "cuda:" + str(device)
-
-    model = make_model(model_type.lower()).to(device)
-
-    optimizer = optim.Adam(model.parameters())
-
-    dataset = []
-    for batch, labels in trn_loader:
-        dataset.append((batch.cpu(), labels.cpu()))
-    for batch, labels in trn_loader:
-        dataset.append((batch.cpu(), labels.cpu()))
-
-    start = time.time()
-    for batch_i, (batch, labels) in enumerate(dataset):
-        batch, labels = batch.to(device), labels.to(device)
-        preds = model(batch)
-        loss = F.cross_entropy(preds, labels)
-        loss.backward()
-        optimizer.step()
-    end = time.time()
-
-    batch_i += 1
-    return round((end - start) / batch_i, 3), batch_i
+from cnn import download_cifar10
+from cnn import *
+from sentim import *
+from wgan import *
+# import resnet
+# import sentim
 
 
 def add_item(stats, bench, cuda, model, time, batches, images):
@@ -157,6 +30,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-b", default=256, help="batch size", type=int)
     parser.add_argument("--br", default=128, help="batch size for RNN", type=int)
+    parser.add_argument("--bg", default=64, help="batch size for WGAN", type=int)
     parser.add_argument("-n", default=100, help="number of batches", type=int)
     parser.add_argument("-f", default=5000, help="number of features", type=int)
     parser.add_argument("-d", default="./data", help="data folder path", type=str)
@@ -183,7 +57,7 @@ if __name__ == "__main__":
     print("  untar time:", round(untar_time, 3))
     print()
 
-    # sentiment_data, alphabet_size = make_imdb_dataset(args.d)
+    sentiment_data, alphabet_size = make_imdb_dataset(args.d)
     print()
 
     stats = []
@@ -202,27 +76,48 @@ if __name__ == "__main__":
         #     print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(2 * n_batches) + " images)")
         # print()
 
-        # print("Sentiment analysis benchmark (full)")
-        # for num_workers in range(0, 5):
-        #     print("[GRU #workers ", num_workers, "]", sep="")
+        ################################################
+        # WGAN training
+        ################################################
+        print("WGAN benchmark (full)")
+        for num_workers in range(0, min(4, max_cpu_count)):
+            print("[WGAN #workers ", num_workers, "]", sep="")
 
-        #     for device in cuda_devices:
-        #         trn_loader = make_imdb_dataloader(sentiment_data, args.br, device, num_workers=num_workers)
-        #         model_time, n_batches = train_sentiment(trn_loader, alphabet_size, device)
+            for device in cuda_devices:
+                trn_loader = make_cifar10_dataset_wgan(args.d, args.bg, device=device, num_workers=0)
+                model_time, n_batches = train_wgan(trn_loader, device)
 
-        #         add_item(stats, "sentim" + str(num_workers).zfill(2), "cuda:" + str(device), 
-        #                  "GRU", model_time, n_batches, args.br * n_batches)
+                add_item(stats, "sentim" + str(num_workers).zfill(2), "cuda:" + str(device), 
+                         "WGAN", model_time, n_batches, args.bg * n_batches)
 
-        #         print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.br * n_batches) + " reviews)")
-        # print()
+                print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.bg * n_batches) + " images)")
+        print()
+    
+
+        ################################################
+        # Sentiment analysis
+        ################################################
+        print("Sentiment analysis benchmark (full)")
+        for num_workers in range(0, min(5, max_cpu_count)):
+            print("[GRU #workers ", num_workers, "]", sep="")
+
+            for device in cuda_devices:
+                trn_loader = make_imdb_dataloader(sentiment_data, args.br, device, num_workers=num_workers)
+                model_time, n_batches = train_sentiment(trn_loader, alphabet_size, device)
+
+                add_item(stats, "sentim" + str(num_workers).zfill(2), "cuda:" + str(device), 
+                         "GRU", model_time, n_batches, args.br * n_batches)
+
+                print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.br * n_batches) + " reviews)")
+        print()
 
         trn_loader = None
         sentiment_data = None
+        
 
-        #
-        # print("DCGAN benchmark (full+disk)")
-        #
-
+        ################################################
+        # CIFAR10 RAM->GPU
+        ################################################
         model_list = ["ResNet18", "ResNet152"] 
 
         print("CIFAR10 benchmark (RAM->GPU data transfer)")
@@ -230,7 +125,7 @@ if __name__ == "__main__":
         for model_type in model_list:
             print("[" + model_type + "]")
             for device in cuda_devices:
-                trn_loader = make_cifar10_dataset(args.d, args.b, device=device, distributed=False, num_workers=0)
+                trn_loader = make_cifar10_dataset_resnet(args.d, args.b, device=device, distributed=False, num_workers=0)
                 model_time, n_batches = train_cnn_ram(model_type, trn_loader, device)
 
                 add_item(stats, "ram_gpu", "cuda:" + str(device), 
@@ -239,12 +134,16 @@ if __name__ == "__main__":
                 print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.b * n_batches) + " images)")
         print()
 
+
+        ################################################
+        # CIFAR10 training
+        ################################################
         print("CIFAR10 benchmark (full+disk)")
         for model_type in model_list:
             for num_workers in range(0, max_cpu_count):
                 print("[" + model_type + " #workers ", num_workers, "]", sep="")
                 for device in cuda_devices:
-                    trn_loader = make_cifar10_dataset(args.d, args.b, device=device, distributed=False, num_workers=num_workers)
+                    trn_loader = make_cifar10_dataset_resnet(args.d, args.b, device=device, distributed=False, num_workers=num_workers)
                     model_time, n_batches = train_cnn_full(model_type, trn_loader, device)
 
                     add_item(stats, "cifar" + str(num_workers).zfill(2), "cuda:" + str(device), 
