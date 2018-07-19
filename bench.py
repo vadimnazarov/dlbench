@@ -84,7 +84,7 @@ if __name__ == "__main__":
             print("[WGAN #workers ", num_workers, "]", sep="")
 
             for device in cuda_devices:
-                trn_loader = make_cifar10_dataset_wgan(args.d, args.bg, device=device, num_workers=0)
+                trn_loader = make_cifar10_dataset_wgan(args.d, args.bg, device=device, num_workers=num_workers)
                 model_time, n_batches = train_wgan(trn_loader, device)
 
                 add_item(stats, "sentim" + str(num_workers).zfill(2), "cuda:" + str(device), 
