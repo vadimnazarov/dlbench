@@ -65,7 +65,7 @@ def make_imdb_dataset(data_path):
     label_data = []
     for key in ["pos", "neg"]:
         for filename in glob.glob("data/imdb/" + key + "/*"):
-            with open(filename) as f:
+            with open(filename, encoding="utf-8") as f:
                 content = f.read().strip().lower()
                 if len(content) < 3000:
                     raw_seq_data.append(list(content))
