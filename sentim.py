@@ -1,5 +1,6 @@
 import os
 import glob
+import tarfile
 
 import torch
 import torch.nn as nn

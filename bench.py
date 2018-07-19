@@ -28,7 +28,7 @@ def add_item(stats, bench, cuda, model, time, batches, images):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("-b", default=256, help="batch size", type=int)
+    parser.add_argument("-b", default=256, help="batch size for ResNet CIFAR10", type=int)
     parser.add_argument("--br", default=128, help="batch size for RNN", type=int)
     parser.add_argument("--bg", default=64, help="batch size for WGAN", type=int)
     parser.add_argument("-n", default=100, help="number of batches", type=int)
@@ -156,12 +156,3 @@ if __name__ == "__main__":
     df.sort_values(by=["benchmark", "device", "model"], inplace=True)
     print(df)
     df.to_csv(args.o + "/logs.txt")
-
-"""
-def comp():
-    sec_per_batch = float(input("sec per batch: "))
-    cost_per_hour = float(input("cost per hour: "))
-    print("batches per dollar:", round(3600 / (sec_per_batch * cost_per_hour), 3))
-
-
-"""
