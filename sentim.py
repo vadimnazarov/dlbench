@@ -90,8 +90,11 @@ def make_imdb_dataset(data_path):
     seq_data = torch.zeros((len(raw_seq_data), max_len, len(alphabet)), dtype=torch.float)
     # seq_data = torch.zeros((500, max_len, len(alphabet)), dtype=torch.float)
     for seq_i in range(seq_data.shape[0]):
-        for symb_i in range(lens_data[seq_i]):
-            seq_data[seq_i, symb_i, get_char_index(seq_data[seq_i][symb_i])] = 1
+        # for symb_i in range(lens_data[seq_i]):
+        #     seq_data[seq_i, symb_i, get_char_index(seq_data[seq_i][symb_i])] = 1
+        seq_data[seq_i, 
+                 list(range(lens_data[seq_i])),
+                 [get_char_index(seq_data[seq_i][symb_i]) for symb_i in range(lens_data[seq_i])]] = 1
 
     lens_data = torch.IntTensor(lens_data)
     label_data = torch.FloatTensor(label_data)
