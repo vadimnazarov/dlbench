@@ -80,7 +80,7 @@ if __name__ == "__main__":
         # WGAN training
         ################################################
         print("WGAN benchmark (full)")
-        for num_workers in range(0, min(4, max_cpu_count)):
+        for num_workers in range(0, 2):
             print("[WGAN #workers ", num_workers, "]", sep="")
 
             for device in cuda_devices:
