@@ -8,7 +8,6 @@ import numpy as np
 from pandas.io.json import json_normalize
 
 import torch
-from cnn import download_cifar10, make_cifar10_dataset_resnet
 from cnn import *
 from sentim import *
 from wgan import *
