@@ -86,7 +86,7 @@ if __name__ == "__main__":
                 trn_loader = make_cifar10_dataset_wgan(args.d, args.bg, device=device, num_workers=num_workers)
                 model_time, n_batches = train_wgan(trn_loader, device)
 
-                add_item(stats, "sentim" + str(num_workers).zfill(2), "cuda:" + str(device), 
+                add_item(stats, "wgan" + str(num_workers).zfill(2), "cuda:" + str(device), 
                          "WGAN", model_time, n_batches, args.bg * n_batches)
 
                 print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.bg * n_batches) + " images)")
@@ -152,6 +152,6 @@ if __name__ == "__main__":
         print()
 
     df = json_normalize(stats)
-    df.sort_values(by=["benchmark", "device", "model"], inplace=True)
+    df.sort_values(by=["model", "benchmark", "device"], inplace=True)
     print(df)
     df.to_csv(args.o + "/logs.txt")
