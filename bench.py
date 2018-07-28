@@ -78,19 +78,19 @@ if __name__ == "__main__":
         ################################################
         # WGAN training
         ################################################
-        print("WGAN benchmark (full)")
-        for num_workers in range(0, 2):
-            print("[WGAN #workers ", num_workers, "]", sep="")
+        # print("WGAN benchmark (full)")
+        # for num_workers in range(0, 2):
+        #     print("[WGAN #workers ", num_workers, "]", sep="")
 
-            for device in cuda_devices:
-                trn_loader = make_cifar10_dataset_wgan(args.d, args.bg, device=device, num_workers=num_workers)
-                model_time, n_batches = train_wgan(trn_loader, device)
+        #     for device in cuda_devices:
+        #         trn_loader = make_cifar10_dataset_wgan(args.d, args.bg, device=device, num_workers=num_workers)
+        #         model_time, n_batches = train_wgan(trn_loader, device)
 
-                add_item(stats, "wgan" + str(num_workers).zfill(2), "cuda:" + str(device), 
-                         "WGAN", model_time, n_batches, args.bg * n_batches)
+        #         add_item(stats, "wgan" + str(num_workers).zfill(2), "cuda:" + str(device), 
+        #                  "WGAN", model_time, n_batches, args.bg * n_batches)
 
-                print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.bg * n_batches) + " images)")
-        print()
+        #         print("  cuda:" + str(device), model_time, "sec / batch (" + str(n_batches) + " batches, " + str(args.bg * n_batches) + " images)")
+        # print()
     
 
         ################################################
