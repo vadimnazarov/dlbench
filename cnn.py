@@ -134,17 +134,23 @@ def download_cifar10(data_path):
 #
 # https://github.com/wang-chen/KervNets/blob/master/cifar-10.py
 #
-def make_cifar10_dataset_resnet(data_path, batch_size, device, distributed=False, num_workers=0):
+def make_cifar10_dataset_resnet(data_path, batch_size, device, transformations, distributed=False, num_workers=0):
     torch.cuda.device(device)
 
-    transform_train = transforms.Compose([
-        transforms.RandomCrop(32, padding=4),
-        transforms.ColorJitter(.25,.25,.25),
-        transforms.RandomRotation(2),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-    ])
+    if transformations:
+        transform_train = transforms.Compose([
+            transforms.RandomCrop(32, padding=4),
+            transforms.ColorJitter(.25,.25,.25),
+            transforms.RandomRotation(2),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ])
+    else:
+        transform_train = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ])
 
     transform_test = transforms.Compose([
         transforms.ToTensor(),
