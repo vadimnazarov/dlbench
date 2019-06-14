@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     for cuda_device in cuda_devices:
         for model_name in model_list:
-            for num_workers in range(1):
+            for num_workers in range(5):
                 print("Device:\t", cuda_device)
                 print("Model:\t", model_name)
                 print("Workers:\t", num_workers)
